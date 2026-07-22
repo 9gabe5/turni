@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Parco Prenestino — Turni RSL · Luglio 2026</title>
+<link rel="icon" type="image/png" href="assets/logo-locomotiva.png">
 <style>
 :root{
   --bg:#0d0f14;--surface:#161a22;--surface2:#1e2330;--border:#2a3042;
@@ -202,6 +203,10 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
 .brand-mark-lg span{font-size:31px;letter-spacing:-3px;transform:translateY(-6px);}
 .brand-mark-lg::before{left:15px;right:15px;bottom:14px;box-shadow:0 7px 0 #f5f1dc;}
 .brand-mark-lg::after{left:19px;right:19px;bottom:10px;height:16px;background:repeating-linear-gradient(90deg,transparent 0 6px,#d7a328 6px 8px);}
+.brand-mark-loco{padding:4px;background:#f8f5e8;border:1px solid #d9ddcf;box-shadow:0 8px 20px rgba(23,62,50,.14);}
+.brand-mark-loco::before,.brand-mark-loco::after{display:none;}
+.brand-mark-loco img{display:block;width:100%;height:100%;object-fit:contain;}
+.brand-mark-loco.brand-mark-lg{padding:6px;}
 .brand-kicker{display:block;font-size:10px;line-height:1.2;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);}
 .brand-name{display:block;margin-top:3px;font-size:18px;line-height:1.1;font-weight:800;color:var(--text);white-space:nowrap;}
 .header-meta{display:flex;align-items:center;gap:12px;flex-shrink:0;}
@@ -367,7 +372,7 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
   <div class="header-shell">
     <div class="header-top">
       <div class="brand-lockup">
-        <div class="brand-mark" aria-label="Logo Parco Prenestino"><span>PP</span></div>
+        <div class="brand-mark brand-mark-loco" aria-label="Logo Parco Prenestino"><img src="assets/logo-locomotiva.png" alt=""></div>
         <div>
           <span class="brand-kicker">RSL · Mercitalia</span>
           <strong class="brand-name">Parco Prenestino</strong>
@@ -400,7 +405,7 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
 <div id="home-screen">
   <div class="home-wrap">
     <div class="home-brand">
-      <div class="brand-mark brand-mark-lg" aria-label="Logo Parco Prenestino"><span>PP</span></div>
+      <div class="brand-mark brand-mark-lg brand-mark-loco" aria-label="Logo Parco Prenestino"><img src="assets/logo-locomotiva.png" alt=""></div>
       <div class="home-brand-copy">
         <div class="home-eyebrow">Roma · Parco ferroviario</div>
         <div class="home-title">Turni Parco Prenestino</div>
