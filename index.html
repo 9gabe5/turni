@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Turni PP">
-<title>Parco Prenestino — Turni RSL · Agosto 2026</title>
+<title>Parco Prenestino — Archivio turni RSL</title>
 <link rel="icon" type="image/png" href="assets/logo-locomotiva.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 <style>
@@ -227,6 +227,8 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
 .date-nav button{width:38px;height:38px;border-radius:11px;background:var(--surface);box-shadow:0 2px 8px rgba(26,44,36,.04);}
 .date-nav button:hover{border-color:#aebbb2;box-shadow:0 6px 16px rgba(26,44,36,.08);}
 .date-label{font-size:15px;}
+.date-nav .date-picker-trigger{width:auto;height:38px;flex:1;padding:0 10px;background:transparent;border-color:transparent;box-shadow:none;}
+.date-nav .date-picker-trigger:hover{background:var(--surface2);border-color:var(--border);box-shadow:none;}
 .today-btn{font-family:var(--font-sans);background:var(--accent)!important;border-color:var(--accent)!important;letter-spacing:.5px;}
 .fascia-sel-row{margin-top:10px;gap:8px;}
 .fascia-sel-btn,.filter-btn{font-family:var(--font-sans);letter-spacing:.25px;text-transform:none;}
@@ -311,13 +313,38 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
 .empty-state{padding:70px 20px;}
 
 /* Finestre e calendario */
-.modal-overlay,.ics-overlay{background:rgba(15,28,22,.64);backdrop-filter:blur(7px);}
+.modal-overlay,.ics-overlay,.date-overlay{background:rgba(15,28,22,.64);backdrop-filter:blur(7px);}
+.date-overlay{display:none;position:fixed;inset:0;z-index:280;}
+.date-overlay.open{display:block;}
 .modal,.ics-modal{
   left:50%;right:auto;bottom:22px;transform:translateX(-50%);width:min(680px,calc(100% - 28px));
   max-height:calc(100vh - 44px);border:1px solid var(--border);border-radius:22px;padding:24px;
   box-shadow:0 30px 90px rgba(13,32,23,.26);
 }
 .ics-modal{width:min(620px,calc(100% - 28px));}
+.date-modal{
+  position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));
+  max-height:calc(100vh - 44px);overflow-y:auto;background:var(--surface);border:1px solid var(--border);
+  border-radius:22px;padding:24px;box-shadow:0 30px 90px rgba(13,32,23,.26);
+}
+.date-handle{display:none;width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 14px;}
+.date-close{position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:#f3f5f2;color:var(--text);font-size:18px;cursor:pointer;}
+.date-picker-kicker{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;}
+.date-picker-title{font-size:24px;font-weight:850;letter-spacing:-.5px;color:var(--text);}
+.date-picker-sub{font-size:13px;color:var(--muted);margin:4px 42px 20px 0;}
+.date-month-nav{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:10px;margin-bottom:15px;}
+.date-month-nav strong{text-align:center;font-size:16px;letter-spacing:-.2px;}
+.date-month-nav button{height:40px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-size:22px;cursor:pointer;}
+.date-month-nav button:disabled{opacity:.32;cursor:not-allowed;transform:none;}
+.date-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;}
+.date-weekday{text-align:center;padding:4px 0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;}
+.date-day{position:relative;min-height:54px;border:1px solid var(--border);border-radius:13px;background:#fff;color:var(--text);font-weight:750;cursor:pointer;}
+.date-day:hover{border-color:#91afa1;background:#f3faf6;}
+.date-day.is-today::after{content:"";position:absolute;left:50%;bottom:7px;width:5px;height:5px;border-radius:50%;background:var(--signal);transform:translateX(-50%);}
+.date-day.is-selected{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(0,106,82,.2);}
+.date-day.is-selected::after{background:#fff;}
+.date-calendar-empty{min-height:54px;}
+.date-archive-note{margin-top:15px;padding:10px 12px;border-radius:12px;background:var(--surface2);font-size:11px;color:var(--muted);text-align:center;font-weight:650;}
 .modal-handle,.ics-handle{display:none;}
 .modal-nome,.ics-title{font-size:22px;letter-spacing:-.35px;}
 .modal-close,.ics-close{width:34px;height:34px;background:#f3f5f2;}
@@ -357,8 +384,11 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
   .turno-card{min-height:72px;padding:13px 14px;}
   .avatar{width:42px;height:42px;}
   .legend{margin:16px 14px 0;}
-  .modal,.ics-modal{bottom:0;width:100%;max-height:88vh;border-radius:22px 22px 0 0;border-left:0;border-right:0;padding:20px 16px;}
-  .modal-handle,.ics-handle{display:block;}
+  .modal,.ics-modal,.date-modal{bottom:0;width:100%;max-height:88vh;border-radius:22px 22px 0 0;border-left:0;border-right:0;padding:20px 16px;}
+  .modal-handle,.ics-handle,.date-handle{display:block;}
+  .date-picker-title{font-size:22px;}
+  .date-calendar{gap:4px;}
+  .date-day,.date-calendar-empty{min-height:48px;}
   .month-grid{gap:3px;}
   .day-cell{min-height:48px;padding:3px 1px;}
 }
@@ -384,7 +414,7 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
         </div>
       </div>
       <div class="header-meta">
-        <span class="month-chip">Agosto 2026</span>
+        <span class="month-chip" id="active-month-chip">Agosto 2026</span>
         <span class="clock" id="clock">--:--</span>
       </div>
     </div>
@@ -394,7 +424,7 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
     </div>
     <div class="date-nav" id="date-nav-row" style="display:none;">
       <button onclick="navIndietro()" aria-label="Giorno precedente">‹</button>
-      <span class="date-label" id="date-label">—</span>
+      <button class="date-label date-picker-trigger" id="date-label" onclick="goConsultazione()" aria-label="Apri il calendario">—</button>
       <button class="today-btn" onclick="goToday()">OGGI</button>
       <button onclick="navAvanti()" aria-label="Giorno successivo">›</button>
     </div>
@@ -423,11 +453,11 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
     </button>
     <button class="home-btn" onclick="goConsultazione()">
       <span class="home-btn-icon">📅</span>
-      <div><div class="home-btn-label">Consultazione</div><div class="home-btn-desc">Scegli data e fascia oraria</div></div>
+      <div><div class="home-btn-label">Controlla una data</div><div class="home-btn-desc">Apri il calendario e scegli il giorno</div></div>
     </button>
     <button class="home-btn home-btn-ics" onclick="openIcsModal()">
       <span class="home-btn-icon">📥</span>
-      <div><div class="home-btn-label">Scarica il tuo turno</div><div class="home-btn-desc">Esporta i turni del mese nel calendario</div></div>
+      <div><div class="home-btn-label">Scarica il tuo turno</div><div class="home-btn-desc">Esporta i turni del mese selezionato</div></div>
     </button>
     <div class="home-search-wrap">
       <div class="home-search-label">🔍 Cerca dipendente</div>
@@ -466,6 +496,24 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
   <div class="spacer"></div>
 </div>
 
+<!-- CALENDARIO DATE -->
+<div class="date-overlay" id="date-overlay" onclick="closeDatePicker(event)">
+  <div class="date-modal" role="dialog" aria-modal="true" aria-labelledby="date-picker-title">
+    <div class="date-handle"></div>
+    <button class="date-close" onclick="closeDatePickerDirect()" aria-label="Chiudi calendario">×</button>
+    <div class="date-picker-kicker">Archivio turni</div>
+    <div class="date-picker-title" id="date-picker-title">Controlla una data</div>
+    <div class="date-picker-sub">Scegli un mese e poi il giorno da consultare.</div>
+    <div class="date-month-nav">
+      <button id="date-prev-month" onclick="navMeseCalendario(-1)" aria-label="Mese precedente">‹</button>
+      <strong id="date-month-label">—</strong>
+      <button id="date-next-month" onclick="navMeseCalendario(1)" aria-label="Mese successivo">›</button>
+    </div>
+    <div class="date-calendar" id="date-calendar"></div>
+    <div class="date-archive-note" id="date-archive-note"></div>
+  </div>
+</div>
+
 <!-- MODAL DIPENDENTE -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal">
@@ -483,7 +531,7 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
     <div class="ics-handle"></div>
     <button class="ics-close" onclick="closeIcsModalDirect()">×</button>
     <div class="ics-title">📥 Scarica il tuo turno</div>
-    <div class="ics-sub">Cerca il tuo nome e scarica il file .ics da importare nel calendario</div>
+    <div class="ics-sub" id="ics-sub">Cerca il tuo nome e scarica il file .ics da importare nel calendario</div>
     <input type="text" class="ics-search" id="ics-search" placeholder="Nome o cognome…" oninput="renderIcsSearch()" autocomplete="off"/>
     <div id="ics-results"></div>
   </div>
@@ -602,9 +650,100 @@ function isAttivo(codice, fascia){
 }
 
 // ============================================================
-// DATI AGOSTO 2026
+// ARCHIVIO TURNI — LUGLIO E AGOSTO 2026
 // ============================================================
-var DIPENDENTI=[
+var TURNI_LUGLIO_2026=[
+  // DEVIATORI
+  {n:"Alivernini Flavio",s:"parco",t:["SN","R2","P1","M1-N1","SN","RM","P3","P1","M1-N1","SN","R1","R2","P1","M1-N1","SN","P3","R2","P1","M1-N1","N1","SN","R1","P1","M1","R1","R2","P3","P1","M1-N1","SN","R2"]},
+  {n:"Cantini Daniele",s:"parco",t:["Rip","ASS","ASS","ASS","R2","ASS","ASS","ASS","ASS","R2","ASS","ASS","ASS","ASS","R1","M3","P3","CTp","CTm","RM","Rip","P3","M3-N3","N3","SN","R2","CTp","CTm-N3","N3","SN","R2"]},
+  {n:"Cordeschi Simone",s:"parco",t:["P3","M3-N3","SN","R1","R2","P3","M1-N3","N3","SN","R2","P3","M3-N3","SN","R1","P1","M1-N1","SN","R1","R2","Rip","P1","M1-N3","SN","R2","P1","P3","M3-N3","SN","R1","R2","P3"]},
+  {n:"De Angelis A. (Dev)",s:"parco",t:["SN","R1","CTp","R2","MCP1-NCP1","SN","R2","CTp","MCP1-NCP1","SN","R1","R2","MCP1","PCP1","MCP1-CTn","SN","RM","R2","PCP1","MCP2-CTn","SN","R1","R2","PCP1","MCP1-CTn","N1","SN","RM","PCP2","CTm-CTn","N1"]},
+  {n:"De Dominicis Daniele",s:"parco",t:["R2","PCP1","ASS","Rip","PCP1","MCP1-NCP1","SN","R1","PCP1","MCP2","ASS","R2","PCP2","M3","NCP2-ASS","SN","R2","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","RM","ASS","ASS","ASS","ASS"]},
+  {n:"Giusti Pasquale",s:"parco",t:["ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","Rip","ASS","P1","M1-N1","SN","R2","P3","CTp","CTm-N1","SN","CTp","R2","P1","M1-N1","SN","R1","P1","P1"]},
+  {n:"Molinari Mattia",s:"parco",t:["Rip","ASS","R2","pmp2","nmp2-ASS","SN","R2","ASS","R2","P1","N3-ASS","SN","ASS","GVM","RM","ASS","ASS","ASS","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","Rip","R1","ASS","ASS"]},
+  {n:"Pandolfi Stefano",s:"parco",t:["P1","R2","P3","CTm-N3","SN","RM","CTp","P3","M3-N3","SN","R2","N1","SN","M3-N3","SN","R1","R2","ASS","ASS","ASS","R1","ASS","ASS","ASS","ASS","R2","Rip","ASS","ASS","ASS","R2"]},
+  {n:"Veglianti Leonardo",s:"parco",t:["ASS","ASS","R2","PCP1","MCP2-NCP2","SN","MCP2","M1","R2","PCP1","MCP1-N1","SN","Rip","RM","PCP1","MCP2-NCP2","SN","R1","R2","PCP1","MCP1-NCP1","SN","R1","MCP2","PCP1","MCP1-NCP1","SN","R1","P","PCP1","MCP1-NCP1"]},
+  {n:"Vicarelli Augusto",s:"parco",t:["M1","M1","M1-N1","SN","R2","M3","P1","N1","SN","R2","Rip","P1","M1-N1","SN","R1","R2","P1","M1-N1","SN","RM","M1","P1","M1-N1","N1","SN","R2","Rip","M1-N1","SN","R1","R2"]},
+  // TRAGHETTATORI
+  {n:"Vitti Christian",s:"parco",t:["ASS","ASS","ASS","ASS","ASS","ASS","R1","PCP1","PT1","MT1-NT1","SN","MT5","Rip","PT1","MT2-NT2","SN","R2","PT2","PT3","MT3-NT3","SN","R1","R2","PT3","MT3-NT3","SN","RM","PT5","PT3","MT3-NT3","SN"]},
+  {n:"Assi Davide",s:"parco",t:["MT2-NT2","SN","R2","MT3","PT2","MT2-NT2","NT1","SN","R2","ASS","NT2-ASS","SN","MCD","RM","MT4","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","Rip","ASS","ASS"]},
+  {n:"Biscossi Marco",s:"parco",t:["Rip","MCD","PT2","MT1-NT1","SN","Rip","PT3","MT3-NT3","SN","R2","MCD","PCD","MT3-NT3","SN","R2","NT1","SN","MT3-NT3","SN","RM","PT1","PT3","MT3-NT3","SN","R1","PT1","MT1-NT1","SN","R1","R1","R2"]},
+  {n:"Cecchini Piergiorgio",s:"parco",t:["PT5","R1","PT5","PT5","PT5","PCD","R1","PT2","PT5","PT5","ASS","PT3","RM","PT5","PT5","PT5","PT5","R1","R2","PT5","PT5","PT5","R1","R2","PT5","PT5","MT5","R1","R2","PT5","PT5"]},
+  {n:"Coccimiglio Alessandro",s:"parco",t:["R1","ASS","ASS","ASS","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","R1","MCD","PT5","MT5","RM","MT5","MT5","MT5","ASS","R1","PT1","PT5","MT5","ASS","R1","MT2"]},
+  {n:"Cozzolino Alessandro",s:"parco",t:["ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","PT3","MT3-NT3","SN","R1","MT1","PT3","MT3","ASS","R2","Rip","PT3","MT3-NT3","SN","R2","MT1","PT3","MT3","ASS","R1","R2","PT3"]},
+  {n:"Croce Flavio",s:"parco",t:["R1","PT3","MT3","PT2","R2","PCP2","Rip","PT1","MT2-NT2","SN","R1","R2","PT2","MT2-NT2","SN","MT5","R2","ASS","ASS","ASS","R1","ASS","ASS","ASS","ASS","R2","Rip","ASS","ASS","ASS","R2"]},
+  {n:"Gatti Danilo",s:"parco",t:["MT4","R1","MT2","MT4","PT4","MT4","R1","R2","MT4","PT4","PT4","MT4","RM","PT4","PT4","MT4","PT4","R1","R2","PT4","MT4","MT4","PCP2","R2","MT4","R2","MT4","R1","R2","PT4","MT4"]},
+  {n:"Ignazzitto Alessio",s:"parco",t:["MT5","MT4","MT5","MT5","MT5","RM","ASS","ASS","ASS","ASS","ASS","ASS","ASS","MT5","MT5","MT1","R2","MT5","PT5","MT5","R1","R2","ASS","ASS","ASS","ASS","RM","ASS","ASS","ASS","ASS"]},
+  {n:"Marzano Domenico",s:"parco",t:["Rip","ASS","ASS","ASS","R2","Rip","ASS","ASS","ASS","R2","ASS","ASS","ASS","ASS","R1","R2","PT2","MT2-NT2","SN","RM","P","PT2","ASS","ASS","R1","R2","PT2","MT2-NT2","SN","R1","R2"]},
+  {n:"Modesti Andrea",s:"parco",t:["MT3-NT3","SN","NT3","SN","PT3","MT3","ASS","R1","MT5","ASS","ASS","ASS","RM","MT1","PT3","MT3-NT3","SN","R1","PT1","PT3","MT3-NT3","SN","R1","R2","PT3","MT3-NT3","SN","R1","PT1","PT3","MT3-NT3"]},
+  {n:"Morzilli Samuele",s:"parco",t:["PT2","MT2-NT2","NT2","SN","R2","R1","MT2-NT2","SN","R1","MT2","PT2","MT2-NT2","SN","R1","pmp3","PCD","MT2","Rip","R2","P3","MT2","MT2-NT2","SN","R2","PT2","PT2","MT2-NT2","SN","MT2","R2","PT1"]},
+  {n:"Orefice Luca",s:"parco",t:["ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R2","ASS","PT2","MT1-NT1","SN","MT2","Rip","PT2","MT1-NT1","SN","Rip","R1","R2","ASS","ASS","ASS","R2","PT2"]},
+  {n:"Pedicelli Andrea",s:"parco",t:["SN","R1","R2","ASS","ASS","ASS","R1","ASS","ASS","ASS","ASS","R2","Rip","ASS","ASS","ASS","R2","PCD","MCP2-NT2","SN","R1","R2","PT2","PT2","MT2-NT2","SN","RM","PT2","PT2","MT2-NT2","SN"]},
+  {n:"Porri Simone",s:"parco",t:["PT1","ASS","ASS","PT4","MT4","RM","PT4","PT4","PT4","MT4","R1","R2","PT4","MT4","PT1","R1","R2","MT4","MCD","MT4","R1","R2","PT4","MT4","PT4","MT4","RM","MCD","PT4","MT4","PT4"]},
+  {n:"Rezzonico Daniele",s:"parco",t:["SN","R1","R2","PT3","MT3-NT3","SN","R1","PT3","PT3","MT3","ASS","R2","ASS","PT3","MT3-NT3","SN","R2","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","RM","ASS","ASS","ASS","ASS"]},
+  {n:"Santi Giulio",s:"parco",t:["PT4","MT5","PT4","R1","R2","MT5","MT4","MCD","R1","R2","MT4","PT4","PT5","R1","PT2","PT1","MT4","PT3","MT4","RM","PT4","PT4","MT4","PT4","R1","R2","PT4","MT4","MT4","R1","R2"]},
+  {n:"Scappaticci Matteo",s:"parco",t:["MT1-NT1","SN","ASS","R2","PT1","MT1","ASS","R1","R2","PT1","MT1-NT1","SN","RM","ASS","ASS","ASS","ASS","R1","R2","PT1","MT1-NT1","SN","R1","R2","PT1","MT1-NT1","SN","R1","Rip","PT1","MT1-NT1"]},
+  {n:"Tomaselli Daniele",s:"parco",t:["R1","R2","PCD","MT2-NT2","SN","RM","MCD","MT5","MT3-NT3","SN","R1","MT1","PT1","MT3-NT3","SN","R2","NT2","SN","MT1-NT1","SN","R1","PT1","PT1","MT1-NT1","SN","R2","P","PT1","MT1-NT1","SN","R2"]},
+  {n:"Troncarelli Gianluca",s:"parco",t:["ASS","PT1","MT1-NT1","SN","R2","PT1","PT1","MT1-NT1","SN","R1","PT1","PT1","MT1-NT1","SN","R1","R2","PT1","MT1-NT1","CTn","SN","RM","R1","MT1-NT1","SN","R1","MT2","PT1","MT1-NT1","SN","PT2","R2"]},
+  {n:"Ubaldini Diego",s:"parco",t:["Rip","PCP2","MCP2-NCP2","SN","R2","PT3","PCP2","MT2-NT2","SN","R2","PCP2","PCP2","MCP2-NT2","SN","R1","R2","R2","Rip","PT2","MT2-NT2","SN","Rip","R1","MT2-NT2","SN","PT4","Rip","PCP2","MCP2-NT2","SN","R2"]},
+  // MACCHINISTI E MANOVRATORI
+  {n:"Saputo Salvatore",s:"parco",t:["Rip","PT2","MCP1-nmp1","SN","R2","PT5","PCP1","ASS","ASS","R2","MT5","PCP1","MT2-nmp1","SN","R1","R2","PT3","MCP1-nmp1","SN","MT1","RM","PCP1","MCP1-nmp1","SN","R1","R2","PT3","MT3-nmp1","SN","R1","R2"]},
+  {n:"Abbafati Alessio",s:"parco",t:["R1","R2","ASS","ASS","ASS","RM","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS","NT3-ASS","SN","R1","MCP1","PT3","MT3-NT3","SN","R2","Rip","PT3","MT3-NT3","SN","R2"]},
+  {n:"Agostini Costantino",s:"parco",t:["R2","mmp3-nmp3","SN","mmp3","ASS","ASS","R1","MCP1","pmp1","mmp1","pmp2","R2","Rip","pmp1","mmp1-nmp1","SN","R1","R2","pmp3","mmp3-nmp3","SN","R1","R2","pmp3","mmp3-nmp3","SN","RM","Rip","pmp3","mmp3-nmp3","SN"]},
+  {n:"Ambesi Antonio",s:"parco",t:["Rip","pmp1","mmp2","ASS","R2","P7V","ASS","mmp1","R1","R2","pmp1","ASS","mmp2","R1","R2","ASS","ASS","ASS","ASS","RM","pmp2","pmp1","mmp1","P","R1","P7V","pmp1","mmp1","P1","R1","R2"]},
+  {n:"Cabiddu Luca",s:"parco",t:["ASS","R2","ASS","ASS","ASS","RM","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","pmp1","mmp1-nmp1","SN","R1","M3","P3","M3","ASS","M1","Rip","pmp1","mmp1-nmp1","nmd","SN"]},
+  {n:"Calascione Valerio",s:"parco",t:["SN","CTp","CTm","R2","CTm-N1","SN","Rip","R1","CTp","CTm-N1","SN","R2","CTp","ASS","ASS","ASS","R2","ASS","ASS","ASS","ASS","RM","GVM","CTm-CTn","SN","R2","CTm","P3","CTm-CTn","SN","R2"]},
+  {n:"Casaldi Valerio",s:"parco",t:["ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","GVM","R1","R2","G","G","G","G","G","R1","R2","GVM","R1","Rip","P3","M3-N3"]},
+  {n:"Cherubini Lorenzo",s:"parco",t:["Rip","ASS","ASS","ASS","R2","Rip","ASS","ASS","ASS","R2","ASS","ASS","ASS","ASS","R1","R2","R2","pmp2","mmp2-nmp2","SN","RM","pmp2","mmp2-nmp2","SN","R1","R2","pmp2","mmp2-nmp2","SN","R2","P"]},
+  {n:"Cianciotto Gilberto",s:"parco",t:["G","G","G","R1","R2","ASS","G","G","G","ASS","R1","R2","G","GCF","GCF","ASS","ASS","R1","R2","ASS","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","ASS","ASS"]},
+  {n:"Ciula Alessandro",s:"parco",t:["pmp1","mmp1","R1","R2","pmp1","mmp1-nmp1","NCP2","SN","Rip","pmp1","mmp3-nmp3","nmp3","SN","Rip","pmp2","MCP1","PCP1","R2","PCP2","MCP1-NCP1","SN","R2","pmp3","PCP2","MCP2-NCP2","SN","RM","R1","PCP1","MCP1-NCP2","SN"]},
+  {n:"Cori Cristian",s:"parco",t:["ASS","ASS","R2","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","RM","ASS","ASS","mmp1-nmp1","SN","R1","R2","pmp1","mmp2-nmp2","SN","pmp2","R2","pmp1","mmp1-nmp1","SN","R1","Rip","pmp1","mmp2-nmp2"]},
+  {n:"Damascan Andrei",s:"parco",t:["SN","R1","R2","ASS","ASS","ASS","R1","ASS","ASS","ASS","ASS","R2","Rip","ASS","ASS","ASS","R2","mmp1","pmp1","mmp1-nmp1","SN","R1","R2","P3","M3-N3","SN","RM","M3","P3","mmd-N3","SN"]},
+  {n:"De Angelis Andrea",s:"parco",t:["R1","R2","PCP2","MCP2-NT3","SN","RM","MCP1","PCP2","MT1-NT1","SN","R1","R2","ASS","MCP2-NT1","SN","R1","R2","PCP2","MT3","ASS","PCP2","R1","ASS","ASS","ASS","R2","Rip","pmp3","mmp3-nmp3","SN","R2"]},
+  {n:"De Palma Luigi",s:"parco",t:["PCP2","R2","PCP1","MCP1-nmp1","SN","RM","R1","Rip","PCP2","MCP1-nmp1","SN","R2","PCP1","MCP1-NCP1","SN","N3","SN","PCP1","MCP1-NCP1","SN","R1","R1","PCP1","MCP1-NCP1","SN","R2","Rip","PCP1","MCP1-NCP1","SN","PCP1"]},
+  {n:"De Stefani Valerio",s:"parco",t:["mmp2-nmp2","SN","R2","Rip","P1","M1-N1","SN","R1","P1","M1-nmp3","SN","pmp1","M3","RM","P3","mmp2-nmp2","SN","R1","R2","pmp2","M3-N1","SN","R2","mmp1","pmp2","mmp2-nmp2","SN","R1","pmd","pmp2","M1-nmp1"]},
+  {n:"Feurra Federico",s:"parco",t:["pmp2","M7V-nmp1","N3","SN","R2","pmp1","mmp2-nmp2","SN","R1","R2","M3","mmp2-nmp2","SN","P3","R1","pmp1","mmp1-nmp1","SN","M3","Rip","pmp1","mmp1-nmp1","SN","R2","P3","pmp1","mmp1-nmp1","SN","R1","P7V","pmp1"]},
+  {n:"Lipperini Marco",s:"parco",t:["M3-N3","SN","M3","R2","P3","CTm-N3","N1","SN","R2","P3","CTm-nmp1","SN","CTm","RM","M1","ASS","ASS","R1","R2","ASS","ASS","ASS","R2","ASS","ASS","ASS","ASS","R1","Rip","ASS","ASS"]},
+  {n:"Luciani Alessio",s:"parco",t:["ASS","R1","R2","ASS","ASS","ASS","R1","R2","pmp2","mmp3","ASS","ASS","RM","ASS","ASS","ASS","ASS","R1","R2","pmp3","mmp3","ASS","R1","R2","ASS","ASS","MCP1","R1","R2","ASS","mmp1"]},
+  {n:"Mancinelli Nicolo'",s:"parco",t:["mmp3","pmp2","mmp1-nmp2","SN","R2","PCP1","ASS","mmp2-nmp2","SN","R2","mmp1","PCP1","mmp1-nmp2","SN","R1","Rip","R2","Rip","ASS","mmp2-nmp2","nmp1","SN","R2","pmp2","mmp2-nmp2","SN","RM","Rip","pmp2","mmp2-nmp2","SN"]},
+  {n:"Mastrantonio Alessio",s:"parco",t:["ASS","ASS","R2","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","GCF","M","ASS","R1","R2","ASS","GCF","G","R1","R2","pmp3","mmp3-nmp3","SN","R1","Rip","pmp3","mmp3-nmp3"]},
+  {n:"Napolitano Gianmarco",s:"parco",t:["ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","ASS","ASS","MCP2-NCP2","SN","R2","Rip","MCP2","MCP2-NCP2","SN","ASS","R2","PCP2","MCP2-NCP2","SN","R1","R2","PCP2"]},
+  {n:"Olivetti Mattia",s:"parco",t:["nmp1","SN","R2","Rip","pmp2","mmp2-nmp2","SN","R1","pmp3","mmp2-nmp2","SN","R2","Rip","pmp3","mmp3-nmp3","SN","R2","ASS","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","Rip","ASS","ASS"]},
+  {n:"Palla Gianluca",s:"parco",t:["mmp1","mmp2-nmp2","SN","R1","R2","pmp2","M3-nmp1","SN","R1","R2","P1","M1-nmp1","N3","SN","R1","pmp2","mmp2-nmp2","SN","R2","P1","P3","mmp2-nmp2","SN","R2","R1","pmp2","mmp2-nmp2","nmp3","SN","R2","pmp2"]},
+  {n:"Peca Francesco",s:"parco",t:["ASS","P1","R2","P3","M1-N3","SN","R1","M3","P3","M3-N3","SN","R2","Rip","P1","M3-N3","SN","M3","R2","P3","M3-N3","SN","R1","R2","P1","M1-N1","SN","RM","Rip","M3","M3-N1","SN"]},
+  {n:"Perfetti Mattia",s:"parco",t:["SN","R2","pmp3","M3-nmp3","SN","P1","RM","pmp3","mmp3-nmp3","SN","R1","R2","pmp3","mmp3-nmp3","SN","R1","R2","ASS","ASS","ASS","R1","ASS","ASS","ASS","ASS","R2","Rip","ASS","ASS","ASS","R2"]},
+  {n:"Piacentini Samuel",s:"parco",t:["R1","MCP2","pmp1","mmp1-NCP1","SN","pmp3","RM","ASS","mmp1-nmp1","SN","R1","MCP2","pmp1","mmp1-nmp1","SN","R2","pmp1","MCP2","ASS","Rip","R1","mmp3","R2","pmp1","mmp1-nmp1","SN","Rip","R1","pmp1","mmp1-nmp1","SN"]},
+  {n:"Piccioni Patrizio",s:"parco",t:["nmp3-ASS","SN","R2","ASS","mmp3-nmp3","SN","PCP2","R2","ASS","pmp2","M3-nmp1","SN","Rip","pmp1","mmp2-nmp2","SN","R2","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","RM","ASS","ASS","ASS","ASS"]},
+  {n:"Romani Diego",s:"parco",t:["Rip","pmp3","mmp3-nmp3","SN","R2","Rip","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","R2","pmp3","mmp3","R1","R1","M7V"]},
+  {n:"Roscini Gabriele",s:"parco",t:["ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","RM","PCP1","PCP2","MCP2-NCP2","SN","R1","R2","PCP2","MCP2-NCP2","SN","R1","R2"]},
+  {n:"Sabau George Iulian",s:"parco",t:["R2","P7V","M7V","P7V","M7V","RM","P7V","M7V","M7V","P7V","R1","R2","P7V","M7V","M7V","M7V","R2","M7V","P7V","M7V","R1","R2","P7V","M7V","P7V","M7V","RM","P7V","P7V","M7V","P7V"]},
+  {n:"Santarpia Emanuele",s:"parco",t:["R1","R2","pmp2","mmp2-nmp2","SN","RM","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","pmp2","mmp2-nmp2","SN","Rip","R1","ASS","pmp1","mmp2-nmp2","SN","R2","Rip","pmp2","mmp2-nmp2","SN","R2"]},
+  {n:"Santini Matteo",s:"parco",t:["pmp3","MCP1-NCP1","SN","R1","R2","PT4","MT3-nmp3","SN","R1","R2","pmp3","mmp3-nmp3","SN","R1","pmp1","PT4","ASS","ASS","R2","Rip","mmp1-nmp3","nmp3","SN","R2","MT5","pmp3","mmp3-nmp3","SN","R1","MCP2","pmp3"]},
+  {n:"Santirocchi Francesco",s:"parco",t:["PCP1","MT1-NT1","SN","R1","R2","PT4","NT3-ASS","SN","R1","PCP2","PCP1","MCP1-NT1","SN","R1","ASS","ASS","ASS","ASS","R2","Rip","ASS","ASS","ASS","R2","ASS","ASS","ASS","ASS","R1","R2","P"]},
+  {n:"Torrente Alessandro",s:"parco",t:["ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","G","G","G","G","G"]},
+  {n:"Tucci Cristian",s:"parco",t:["ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","G","R1","R2","G","G","G","G","G"]},
+  {n:"Valeriano Emanuele",s:"parco",t:["mmd-nmd","SN","R2","P1","pmd","mmd-nmd","SN","P7V","R2","pmd","mmd-nmd","SN","M7V","RM","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","R1","Rip","ASS","ASS"]},
+  {n:"Zaccaria Luca",s:"parco",t:["ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","R1","Rip","PCP2","MCP2-NT2"]},
+  // CAPOTURNO
+  {n:"Arcai Chirra Massimo",s:"parco",t:["MCD","R1","ASS","ASS","ASS","ASS","ASS","ASS","CTm-CTn","SN","R1","PT5","ASS","CTm-CTn","SN","R1","R2","ASS","ASS","ASS","R1","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","R2"]},
+  {n:"Bigioni Davide",s:"parco",t:["CTp","CTm-CTn","CTn","SN","R2","CTp","CTm-CTn","CTn","SN","R2","CTp","CTm-CTn","CTn","SN","Rip","CTp","CTm-CTn","SN","R2","Rip","ASS","ASS","ASS","R2","ASS","ASS","CTn-ASS","SN","R2","M1","CTp"]},
+  {n:"Bongi Simone",s:"parco",t:["Rip","ASS","ASS","ASS","R2","Rip","ASS","ASS","ASS","R2","ASS","ASS","ASS","ASS","R1","R2","CTp","CTm-CTn","SN","RM","P","CTp","CTm-CTn","SN","R1","R2","PCP1","MCP1-CTn","SN","R1","R2"]},
+  {n:"Codella Andrea",s:"parco",t:["CTm-CTn","SN","R1","PCP2","CTp","MCP2","ASS","CTm","R2","ASS","CTn-ASS","SN","RM","ASS","CTp","CTm-CTn","SN","R1","R2","CTp","CTm-CTn","SN","CTp","R2","CTp","CTm-CTn","SN","R1","CTp","CTp","CTm-CTn"]},
+  {n:"Perini Luca",s:"parco",t:["ASS","R1","R2","CTp","MT2-NT2","SN","MT5","R1","PT2","MT5-NT2","SN","CTp","Rip","CTp","CTm-NT1","SN","R2","ASS","ASS","ASS","ASS","R1","R2","PT1","CTm-NT1","SN","RM","CTp","PT5","MT1-NT1","SN"]},
+  // DEPOSITO
+  {n:"Cruciani Nicholas",s:"deposito",t:["pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","R1","ASS","pmd","mmd-nmd","SN","R2","Rip","pmd","mmd-nmd","SN","R2","ASS","pmd","mmd-nmd","SN","R1","R2","pmd"]},
+  {n:"Di Pietro Antonio",s:"deposito",t:["SN","R1","pmd","mmd-nmd","SN","RM","M7V","R1","pmd","mmd-nmd","SN","R2","Rip","pmd","mmd-nmd","SN","R2","M3","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","P1","Rip","ASS","ASS","ASS"]},
+  {n:"Fabrizi Andrea",s:"deposito",t:["R1","R2","R2","pmd","mmd-nmd","SN","Rip","pmd","mmd-nmd","SN","R1","P7V","pmd","mmd-nmd","SN","R1","P7V","pmd","mmd-nmd","SN","R1","M7V","pmd","mmd-nmd","SN","R2","M7V","pmd","mmd-nmd","SN","R2"]},
+  {n:"Gambale Silvio",s:"deposito",t:["M7V","R1","R2","M7V","P7V","M7V","R1","R2","P7V","M7V","P7V","M7V","RM","P7V","P7V","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS","ASS"]},
+  {n:"Magnante Marco",s:"deposito",t:["P7V","pmd","mmd-nmd","SN","R2","Rip","pmd","mmd-nmd","SN","R2","M7V","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","RM","M7V","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","R1","R2"]},
+  {n:"Mariani Danny",s:"deposito",t:["PCD","PCD","MCD","PCD","MCD","RM","PCD","PCD","PCD","PCD","R1","R2","PCD","MCD","PCD","R1","R2","ASS","PCD","MCD","R1","R2","PCD","MCD","PCD","MCD","RM","PCD","PCD","MCD","PCD"]},
+  {n:"Morici Giovanni",s:"deposito",t:["ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","P7V","M7V","P7V","M7V","RM","P7V","P7V","M7V","P7V","R1","R2","P7V","M7V","M7V","R1","R2"]},
+  {n:"Pagliaro Frederik",s:"deposito",t:["ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","R1","R2","G","G","G","G","G"]},
+  {n:"Rocchetti Valerio",s:"deposito",t:["ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","PT4","RM","PCD","PCD","MCD","PCD","R1","R2","PCD","PT4","MCD","R1","R2"]},
+  {n:"Zuena Edoardo",s:"deposito",t:["R1","PT5","R2","MCD","PCD","MCD","R1","MT4","MCD","MCD","PCD","MCD","RM","PCD","MCD","MCD","PCD","R1","R2","PCD","MCD","MCD","R1","R2","MCD","PCD","MCD","R1","R2","PCD","MCD"]},
+];
+
+var TURNI_AGOSTO_2026=[
   // DEVIATORI
   {n:"Alivernini Flavio",s:"parco",t:["ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","RM","ASS","ASS","ASS","ASS","R1","R2","Rip","P1","M1-N1","SN","R2","R1","P1","M3-N3","SN","R1","P1","M1-N1","N1","SN","Rip"]},
   {n:"Cantini Daniele",s:"parco",t:["P3","M3-N3","SN","R1","DISP","P3","M3-N3","SN","R2","Rip","P3","M3-N3","SN","R2","mmd","CTp","M3-N3","SN","R1","R2","P3","M3-N3","SN","CTp","RM","CTp","M3-N3","SN","R1","R2","P3"]},
@@ -696,6 +835,16 @@ var DIPENDENTI=[
   {n:"Zuena Edoardo",s:"deposito",t:["PCD","MCD","RM","PCD","PCD","MCD","PCD","R1","R2","PCD","MCD","MCD","R1","R2","MCD","PCD","MCD","R1","R2","PCD","MCD","PCD","MCD","RM","PCD","PCD","MCD","PCD","R1","R2","PCD"]},
 ];
 
+var ARCHIVIO_MESI=[
+  {anno:2026,mese:6,giorni:31,dipendenti:TURNI_LUGLIO_2026},
+  {anno:2026,mese:7,giorni:31,dipendenti:TURNI_AGOSTO_2026},
+];
+var indiceMeseAttivo=ARCHIVIO_MESI.length-1;
+var DIPENDENTI=ARCHIVIO_MESI[indiceMeseAttivo].dipendenti;
+var MESE_ANNO=ARCHIVIO_MESI[indiceMeseAttivo].anno;
+var MESE_MESE=ARCHIVIO_MESI[indiceMeseAttivo].mese;
+var GIORNI_MESE=ARCHIVIO_MESI[indiceMeseAttivo].giorni;
+
 // ============================================================
 // GRUPPI
 // ============================================================
@@ -713,8 +862,7 @@ var GRUPPI_INFO={
   giornaliero:{l:'Giornaliero',ic:'📋'},
 };
 
-// Agosto 2026: 31 giorni, inizia Sabato (giorno 1)
-var MESE_ANNO=2026, MESE_MESE=7, GIORNI_MESE=31;
+// Il mese visualizzato viene scelto dall'archivio disponibile.
 
 // ============================================================
 // STATO
@@ -724,15 +872,38 @@ var currentFilter='tutti';
 var modalita='home';
 var fasciaManuale=null;
 var FASCE=['mattina','pomeriggio','notte'];
+var indiceMeseCalendario=indiceMeseAttivo;
+
+function etichettaMese(mese){
+  return NOMI_M[mese.mese]+' '+mese.anno;
+}
+
+function trovaIndiceMese(anno,mese){
+  return ARCHIVIO_MESI.findIndex(function(x){return x.anno===anno&&x.mese===mese;});
+}
+
+function impostaMese(indice){
+  if(indice<0||indice>=ARCHIVIO_MESI.length)return false;
+  indiceMeseAttivo=indice;
+  var mese=ARCHIVIO_MESI[indice];
+  DIPENDENTI=mese.dipendenti;
+  MESE_ANNO=mese.anno;
+  MESE_MESE=mese.mese;
+  GIORNI_MESE=mese.giorni;
+  var chip=document.getElementById('active-month-chip');
+  if(chip)chip.textContent=etichettaMese(mese);
+  document.title='Parco Prenestino — Turni RSL · '+etichettaMese(mese);
+  return true;
+}
 
 function getFasciaOperativa(){
   var now=new Date();
   var h=now.getHours(), t=h*60+now.getMinutes();
-  if(t>=360&&t<840)  return {fascia:'mattina',   giorno:now.getDate()};
-  if(t>=840&&t<1320) return {fascia:'pomeriggio', giorno:now.getDate()};
-  if(t>=1320)        return {fascia:'notte',       giorno:now.getDate()};
-  var ieri=new Date(now); ieri.setDate(now.getDate()-1);
-  return {fascia:'notte', giorno:ieri.getDate()};
+  var riferimento=new Date(now), fascia='notte';
+  if(t>=360&&t<840)fascia='mattina';
+  else if(t>=840&&t<1320)fascia='pomeriggio';
+  else if(t<360)riferimento.setDate(riferimento.getDate()-1);
+  return {fascia:fascia,giorno:riferimento.getDate(),mese:riferimento.getMonth(),anno:riferimento.getFullYear()};
 }
 
 function getIsoWeek(date){
@@ -750,22 +921,28 @@ function getFasciaAttiva(){
 
 function navAvanti(){
   var f=getFasciaAttiva(), idx=FASCE.indexOf(f);
-  if(idx===2){if(currentDay<GIORNI_MESE){currentDay++;fasciaManuale='mattina';}}
+  if(idx===2){
+    if(currentDay<GIORNI_MESE){currentDay++;fasciaManuale='mattina';}
+    else if(impostaMese(indiceMeseAttivo+1)){currentDay=1;fasciaManuale='mattina';}
+  }
   else{fasciaManuale=FASCE[idx+1];}
   updateFasciaSel(); render();
 }
 function navIndietro(){
   var f=getFasciaAttiva(), idx=FASCE.indexOf(f);
-  if(idx===0){if(currentDay>1){currentDay--;fasciaManuale='notte';}}
+  if(idx===0){
+    if(currentDay>1){currentDay--;fasciaManuale='notte';}
+    else if(impostaMese(indiceMeseAttivo-1)){currentDay=GIORNI_MESE;fasciaManuale='notte';}
+  }
   else{fasciaManuale=FASCE[idx-1];}
   updateFasciaSel(); render();
 }
 
 function goOggi(){
   modalita='oggi'; fasciaManuale=null;
-  var op=getFasciaOperativa(), now=new Date();
-  if(now.getFullYear()===MESE_ANNO&&now.getMonth()===MESE_MESE) currentDay=op.giorno;
-  else currentDay=1;
+  var op=getFasciaOperativa(), idx=trovaIndiceMese(op.anno,op.mese);
+  if(idx>=0){impostaMese(idx);currentDay=op.giorno;}
+  else{impostaMese(ARCHIVIO_MESI.length-1);currentDay=GIORNI_MESE;}
   document.getElementById('home-screen').style.display='none';
   document.getElementById('app-screen').style.display='block';
   document.getElementById('date-nav-row').style.display='flex';
@@ -774,11 +951,46 @@ function goOggi(){
 }
 
 function goConsultazione(){
+  var op=getFasciaOperativa();
+  var idx=trovaIndiceMese(op.anno,op.mese);
+  indiceMeseCalendario=idx>=0?idx:indiceMeseAttivo;
+  renderDatePicker();
+  document.getElementById('date-overlay').classList.add('open');
+}
+
+function renderDatePicker(){
+  var mese=ARCHIVIO_MESI[indiceMeseCalendario];
+  document.getElementById('date-month-label').textContent=etichettaMese(mese);
+  document.getElementById('date-prev-month').disabled=indiceMeseCalendario===0;
+  document.getElementById('date-next-month').disabled=indiceMeseCalendario===ARCHIVIO_MESI.length-1;
+  var html='';
+  NOMI_G.forEach(function(nome){html+='<div class="date-weekday">'+nome+'</div>';});
+  var primo=new Date(mese.anno,mese.mese,1).getDay();
+  for(var vuoto=0;vuoto<primo;vuoto++)html+='<div class="date-calendar-empty"></div>';
+  var oggi=new Date();
+  for(var giorno=1;giorno<=mese.giorni;giorno++){
+    var classi='date-day';
+    if(oggi.getFullYear()===mese.anno&&oggi.getMonth()===mese.mese&&oggi.getDate()===giorno)classi+=' is-today';
+    if(indiceMeseCalendario===indiceMeseAttivo&&giorno===currentDay)classi+=' is-selected';
+    html+='<button class="'+classi+'" onclick="selezionaData('+giorno+')" aria-label="'+giorno+' '+etichettaMese(mese)+'">'+giorno+'</button>';
+  }
+  document.getElementById('date-calendar').innerHTML=html;
+  document.getElementById('date-archive-note').textContent=ARCHIVIO_MESI.length+' mesi disponibili · '+etichettaMese(ARCHIVIO_MESI[0])+' — '+etichettaMese(ARCHIVIO_MESI[ARCHIVIO_MESI.length-1]);
+}
+
+function navMeseCalendario(delta){
+  var nuovo=indiceMeseCalendario+delta;
+  if(nuovo<0||nuovo>=ARCHIVIO_MESI.length)return;
+  indiceMeseCalendario=nuovo;
+  renderDatePicker();
+}
+
+function selezionaData(giorno){
+  impostaMese(indiceMeseCalendario);
+  currentDay=giorno;
   modalita='consultazione';
-  var op=getFasciaOperativa(), now=new Date();
-  fasciaManuale=op.fascia;
-  if(now.getFullYear()===MESE_ANNO&&now.getMonth()===MESE_MESE) currentDay=op.giorno;
-  else currentDay=1;
+  fasciaManuale=getFasciaOperativa().fascia;
+  document.getElementById('date-overlay').classList.remove('open');
   document.getElementById('home-screen').style.display='none';
   document.getElementById('app-screen').style.display='block';
   document.getElementById('date-nav-row').style.display='flex';
@@ -786,8 +998,12 @@ function goConsultazione(){
   showBackBtn(); updateFasciaSel(); render();
 }
 
+function closeDatePicker(e){if(e.target===document.getElementById('date-overlay'))closeDatePickerDirect();}
+function closeDatePickerDirect(){document.getElementById('date-overlay').classList.remove('open');}
+
 function goHome(){
   modalita='home'; fasciaManuale=null;
+  closeDatePickerDirect();
   document.getElementById('home-screen').style.display='block';
   document.getElementById('app-screen').style.display='none';
   document.getElementById('date-nav-row').style.display='none';
@@ -804,9 +1020,9 @@ function showBackBtn(){
 }
 
 function goToday(){
-  var op=getFasciaOperativa(), now=new Date();
-  if(now.getFullYear()===MESE_ANNO&&now.getMonth()===MESE_MESE) currentDay=op.giorno;
-  else currentDay=1;
+  var op=getFasciaOperativa(), idx=trovaIndiceMese(op.anno,op.mese);
+  if(idx>=0){impostaMese(idx);currentDay=op.giorno;}
+  else{impostaMese(ARCHIVIO_MESI.length-1);currentDay=GIORNI_MESE;}
   fasciaManuale=op.fascia; updateFasciaSel(); render();
 }
 
@@ -853,6 +1069,7 @@ function openModalByName(nome){ openModal(nome); }
 // ============================================================
 function openIcsModal(){
   document.getElementById('ics-overlay').classList.add('open');
+  document.getElementById('ics-sub').textContent='Cerca il tuo nome e scarica i turni di '+etichettaMese(ARCHIVIO_MESI[indiceMeseAttivo])+' nel calendario';
   document.getElementById('ics-search').value='';
   document.getElementById('ics-results').innerHTML='';
 }
@@ -885,7 +1102,8 @@ function scaricaIcs(nome){
   var dip=DIPENDENTI.find(function(d){return d.n===nome;});
   if(!dip) return;
 
-  var lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//RSL Turni//Agosto 2026//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  var nomeMese=NOMI_M[MESE_MESE], siglaMese=String(MESE_MESE+1).padStart(2,'0')+MESE_ANNO;
+  var lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//RSL Turni//'+nomeMese+' '+MESE_ANNO+'//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
 
   for(var gg=1;gg<=GIORNI_MESE;gg++){
     var codice=dip.t[gg-1]||'';
@@ -894,7 +1112,7 @@ function scaricaIcs(nome){
 
     var mansione=getMansione(codice,'mattina');
     var sede=dip.s==='parco'?'Parco Prenestino':'San Lorenzo - Deposito';
-    var uid='RSL-'+dip.n.replace(/\s/g,'')+'-'+gg+'-AGO2026@mercitalia';
+    var uid='RSL-'+dip.n.replace(/\s/g,'')+'-'+gg+'-'+siglaMese+'@mercitalia';
 
     if(t.tipo==='doppio'){
       // Due eventi: mattina e notte
@@ -950,7 +1168,7 @@ function scaricaIcs(nome){
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
   a.href=url;
-  a.download='turni_'+dip.n.replace(/\s/g,'_')+'_Agosto2026.ics';
+  a.download='turni_'+dip.n.replace(/\s/g,'_')+'_'+nomeMese+MESE_ANNO+'.ics';
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
@@ -962,7 +1180,8 @@ function render(){
   var now=new Date();
   if(modalita==='oggi'&&!fasciaManuale){
     var op=getFasciaOperativa();
-    if(now.getFullYear()===MESE_ANNO&&now.getMonth()===MESE_MESE) currentDay=op.giorno;
+    var idxOggi=trovaIndiceMese(op.anno,op.mese);
+    if(idxOggi>=0){impostaMese(idxOggi);currentDay=op.giorno;}
   }
   var fascia=getFasciaAttiva();
   document.getElementById('clock').textContent=now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
@@ -971,7 +1190,7 @@ function render(){
   badge.className='fascia-badge '+fl[fascia].c;
   badge.textContent=fl[fascia].t;
   var d=new Date(MESE_ANNO,MESE_MESE,currentDay);
-  document.getElementById('date-label').textContent=NOMI_G[d.getDay()]+' '+currentDay+' Agosto 2026';
+  document.getElementById('date-label').textContent=NOMI_G[d.getDay()]+' '+currentDay+' '+NOMI_M[MESE_MESE]+' '+MESE_ANNO;
   document.getElementById('sett-label').textContent='Sett. '+getIsoWeek(d);
   updateFasciaSel();
 
@@ -1044,7 +1263,7 @@ function openModal(nome){
   var dip=DIPENDENTI.find(function(d){return d.n===nome;});
   if(!dip)return;
   document.getElementById('modal-nome').textContent=dip.n;
-  document.getElementById('modal-ruolo').textContent=(dip.s==='parco'?'Parco Prenestino':'San Lorenzo');
+  document.getElementById('modal-ruolo').textContent=(dip.s==='parco'?'Parco Prenestino':'San Lorenzo')+' · '+NOMI_M[MESE_MESE]+' '+MESE_ANNO;
   var primo=new Date(MESE_ANNO,MESE_MESE,1).getDay();
   var g='';
   NOMI_G.forEach(function(x){g+='<div class="day-header">'+x+'</div>';});
@@ -1070,9 +1289,10 @@ function setFilter(f){ currentFilter=f; document.querySelectorAll('.filter-btn')
 // ============================================================
 // INIT
 // ============================================================
-var _now=new Date();
-if(_now.getFullYear()===MESE_ANNO&&_now.getMonth()===MESE_MESE) currentDay=_now.getDate();
-else currentDay=1;
+var _op=getFasciaOperativa();
+var _indiceOggi=trovaIndiceMese(_op.anno,_op.mese);
+if(_indiceOggi>=0){impostaMese(_indiceOggi);currentDay=_op.giorno;}
+else{impostaMese(ARCHIVIO_MESI.length-1);currentDay=1;}
 
 updateBadge();
 setInterval(function(){ updateBadge(); if(modalita==='oggi') render(); },60000);
