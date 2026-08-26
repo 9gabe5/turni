@@ -336,6 +336,15 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
 .date-month-nav strong{text-align:center;font-size:16px;letter-spacing:-.2px;}
 .date-month-nav button{height:40px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-size:22px;cursor:pointer;}
 .date-month-nav button:disabled{opacity:.32;cursor:not-allowed;transform:none;}
+.archive-month-nav{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:10px;margin:14px 0 16px;}
+.archive-month-nav strong{text-align:center;font-size:15px;letter-spacing:-.15px;}
+.archive-month-nav button{height:40px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-size:22px;cursor:pointer;}
+.archive-month-nav button:disabled{opacity:.32;cursor:not-allowed;transform:none;}
+.modal-month-empty{display:none;margin:8px 0;padding:22px 16px;border-radius:14px;background:var(--surface2);color:var(--muted);font-size:13px;text-align:center;font-weight:650;}
+.ics-month-field{margin:0 0 14px;}
+.ics-month-field label{display:block;margin-bottom:6px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.ics-month-select{width:100%;height:44px;padding:0 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-size:14px;font-weight:750;outline:none;}
+.ics-month-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,106,82,.12);}
 .date-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;}
 .date-weekday{text-align:center;padding:4px 0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;}
 .date-day{position:relative;min-height:54px;border:1px solid var(--border);border-radius:13px;background:#fff;color:var(--text);font-weight:750;cursor:pointer;}
@@ -521,6 +530,12 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
     <button class="modal-close" onclick="closeModalDirect()">×</button>
     <div class="modal-nome" id="modal-nome">—</div>
     <div class="modal-ruolo" id="modal-ruolo">—</div>
+    <div class="archive-month-nav" aria-label="Scegli il mese dei turni">
+      <button id="modal-prev-month" onclick="navMeseModal(-1)" aria-label="Mese precedente">‹</button>
+      <strong id="modal-month-label">—</strong>
+      <button id="modal-next-month" onclick="navMeseModal(1)" aria-label="Mese successivo">›</button>
+    </div>
+    <div class="modal-month-empty" id="modal-month-empty">Nessun turno disponibile per questo mese.</div>
     <div class="month-grid" id="modal-grid"></div>
   </div>
 </div>
@@ -531,7 +546,11 @@ button:focus-visible,input:focus-visible,.turno-card:focus-visible,.home-result-
     <div class="ics-handle"></div>
     <button class="ics-close" onclick="closeIcsModalDirect()">×</button>
     <div class="ics-title">📥 Scarica il tuo turno</div>
-    <div class="ics-sub" id="ics-sub">Cerca il tuo nome e scarica il file .ics da importare nel calendario</div>
+    <div class="ics-sub" id="ics-sub">Scegli il mese, cerca il tuo nome e scarica il calendario.</div>
+    <div class="ics-month-field">
+      <label for="ics-month-select">Mese da scaricare</label>
+      <select class="ics-month-select" id="ics-month-select" onchange="setMeseIcs(this.value)"></select>
+    </div>
     <input type="text" class="ics-search" id="ics-search" placeholder="Nome o cognome…" oninput="renderIcsSearch()" autocomplete="off"/>
     <div id="ics-results"></div>
   </div>
@@ -967,6 +986,9 @@ var modalita='home';
 var fasciaManuale=null;
 var FASCE=['mattina','pomeriggio','notte'];
 var indiceMeseCalendario=indiceMeseAttivo;
+var indiceMeseModal=indiceMeseAttivo;
+var nomeDipendenteModal='';
+var indiceMeseIcs=ARCHIVIO_MESI.length-1;
 
 function etichettaMese(mese){
   return NOMI_M[mese.mese]+' '+mese.anno;
@@ -1143,11 +1165,29 @@ function updateBadge(){
 // ============================================================
 // HOME SEARCH
 // ============================================================
+function dipendentiUnici(dipendenti){
+  var visti={};
+  return dipendenti.filter(function(dip){
+    var chiave=dip.n.toLowerCase()+'|'+dip.s;
+    if(visti[chiave])return false;
+    visti[chiave]=true;
+    return true;
+  });
+}
+
+function elencoDipendentiArchivio(){
+  var tutti=[];
+  for(var i=ARCHIVIO_MESI.length-1;i>=0;i--){
+    tutti=tutti.concat(ARCHIVIO_MESI[i].dipendenti);
+  }
+  return dipendentiUnici(tutti);
+}
+
 function renderHomeSearch(){
   var q=document.getElementById('home-search').value.toLowerCase().trim();
   var res=document.getElementById('home-search-results');
   if(!q){res.innerHTML='';return;}
-  var found=DIPENDENTI.filter(function(d){return d.n.toLowerCase().includes(q);}).slice(0,6);
+  var found=elencoDipendentiArchivio().filter(function(d){return d.n.toLowerCase().includes(q);}).slice(0,6);
   if(!found.length){res.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;">Nessun risultato</div>';return;}
   res.innerHTML=found.map(function(dip){
     var ini=dip.n.split(' ').slice(0,2).map(function(p){return p[0];}).join('');
@@ -1156,26 +1196,44 @@ function renderHomeSearch(){
   }).join('');
 }
 
-function openModalByName(nome){ openModal(nome); }
+function openModalByName(nome){ openModal(nome,ARCHIVIO_MESI.length-1); }
 
 // ============================================================
 // ICS
 // ============================================================
 function openIcsModal(){
+  indiceMeseIcs=ARCHIVIO_MESI.length-1;
   document.getElementById('ics-overlay').classList.add('open');
-  document.getElementById('ics-sub').textContent='Cerca il tuo nome e scarica i turni di '+etichettaMese(ARCHIVIO_MESI[indiceMeseAttivo])+' nel calendario';
   document.getElementById('ics-search').value='';
   document.getElementById('ics-results').innerHTML='';
+  renderMeseIcs();
 }
 
 function closeIcsModal(e){ if(e.target===document.getElementById('ics-overlay')) document.getElementById('ics-overlay').classList.remove('open'); }
 function closeIcsModalDirect(){ document.getElementById('ics-overlay').classList.remove('open'); }
 
+function renderMeseIcs(){
+  var select=document.getElementById('ics-month-select');
+  select.innerHTML=ARCHIVIO_MESI.map(function(mese,indice){
+    return '<option value="'+indice+'"'+(indice===indiceMeseIcs?' selected':'')+'>'+etichettaMese(mese)+'</option>';
+  }).join('');
+  document.getElementById('ics-sub').textContent='Cerca il tuo nome e scarica i turni di '+etichettaMese(ARCHIVIO_MESI[indiceMeseIcs])+'.';
+}
+
+function setMeseIcs(indice){
+  var nuovo=parseInt(indice,10);
+  if(isNaN(nuovo)||nuovo<0||nuovo>=ARCHIVIO_MESI.length)return;
+  indiceMeseIcs=nuovo;
+  renderMeseIcs();
+  renderIcsSearch();
+}
+
 function renderIcsSearch(){
   var q=document.getElementById('ics-search').value.toLowerCase().trim();
   var res=document.getElementById('ics-results');
   if(!q){res.innerHTML='';return;}
-  var found=DIPENDENTI.filter(function(d){return d.n.toLowerCase().includes(q);}).slice(0,8);
+  var mese=ARCHIVIO_MESI[indiceMeseIcs];
+  var found=dipendentiUnici(mese.dipendenti).filter(function(d){return d.n.toLowerCase().includes(q);}).slice(0,8);
   if(!found.length){res.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;">Nessun risultato</div>';return;}
   res.innerHTML=found.map(function(dip){
     var ini=dip.n.split(' ').slice(0,2).map(function(p){return p[0];}).join('');
@@ -1193,13 +1251,15 @@ function icsDateTime(anno, mese, giorno, ora, min, secondoGiornoOffset){
 }
 
 function scaricaIcs(nome){
-  var dip=DIPENDENTI.find(function(d){return d.n===nome;});
+  var meseArchivio=ARCHIVIO_MESI[indiceMeseIcs];
+  var dip=meseArchivio.dipendenti.find(function(d){return d.n===nome;});
   if(!dip) return;
 
-  var nomeMese=NOMI_M[MESE_MESE], siglaMese=String(MESE_MESE+1).padStart(2,'0')+MESE_ANNO;
-  var lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//RSL Turni//'+nomeMese+' '+MESE_ANNO+'//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  var annoIcs=meseArchivio.anno, meseIcs=meseArchivio.mese, giorniIcs=meseArchivio.giorni;
+  var nomeMese=NOMI_M[meseIcs], siglaMese=String(meseIcs+1).padStart(2,'0')+annoIcs;
+  var lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//RSL Turni//'+nomeMese+' '+annoIcs+'//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
 
-  for(var gg=1;gg<=GIORNI_MESE;gg++){
+  for(var gg=1;gg<=giorniIcs;gg++){
     var codice=dip.t[gg-1]||'';
     var t=parseTurno(codice);
     if(!t||t.tipo==='riposo'||t.tipo==='assente'||t.tipo==='sn') continue;
@@ -1217,8 +1277,8 @@ function scaricaIcs(nome){
 
       lines.push('BEGIN:VEVENT');
       lines.push('UID:'+uid+'-M');
-      lines.push('DTSTART:'+icsDateTime(MESE_ANNO,MESE_MESE,gg,parseInt(orM[0]),parseInt(orM[1]),0));
-      lines.push('DTEND:'+icsDateTime(MESE_ANNO,MESE_MESE,gg,parseInt(orMf[0]),parseInt(orMf[1]),0));
+      lines.push('DTSTART:'+icsDateTime(annoIcs,meseIcs,gg,parseInt(orM[0]),parseInt(orM[1]),0));
+      lines.push('DTEND:'+icsDateTime(annoIcs,meseIcs,gg,parseInt(orMf[0]),parseInt(orMf[1]),0));
       lines.push('SUMMARY:'+mansM+' — '+codice+' (Mattina)');
       lines.push('DESCRIPTION:Sede: '+sede+'\\nTurno: '+codice);
       lines.push('LOCATION:'+sede);
@@ -1226,8 +1286,8 @@ function scaricaIcs(nome){
 
       lines.push('BEGIN:VEVENT');
       lines.push('UID:'+uid+'-N');
-      lines.push('DTSTART:'+icsDateTime(MESE_ANNO,MESE_MESE,gg,parseInt(orN[0]),parseInt(orN[1]),0));
-      lines.push('DTEND:'+icsDateTime(MESE_ANNO,MESE_MESE,gg+1,parseInt(orNf[0]),parseInt(orNf[1]),0));
+      lines.push('DTSTART:'+icsDateTime(annoIcs,meseIcs,gg,parseInt(orN[0]),parseInt(orN[1]),0));
+      lines.push('DTEND:'+icsDateTime(annoIcs,meseIcs,gg+1,parseInt(orNf[0]),parseInt(orNf[1]),0));
       lines.push('SUMMARY:'+mansN+' — '+codice+' (Notte)');
       lines.push('DESCRIPTION:Sede: '+sede+'\\nTurno: '+codice);
       lines.push('LOCATION:'+sede);
@@ -1235,8 +1295,8 @@ function scaricaIcs(nome){
     } else if(t.tipo==='disp'){
       lines.push('BEGIN:VEVENT');
       lines.push('UID:'+uid);
-      lines.push('DTSTART;VALUE=DATE:'+MESE_ANNO+pad(MESE_MESE+1)+pad(gg));
-      lines.push('DTEND;VALUE=DATE:'+MESE_ANNO+pad(MESE_MESE+1)+pad(gg+1));
+      lines.push('DTSTART;VALUE=DATE:'+annoIcs+pad(meseIcs+1)+pad(gg));
+      lines.push('DTEND;VALUE=DATE:'+annoIcs+pad(meseIcs+1)+pad(gg+1));
       lines.push('SUMMARY:Disponibile');
       lines.push('DESCRIPTION:Sede: '+sede);
       lines.push('LOCATION:'+sede);
@@ -1248,8 +1308,8 @@ function scaricaIcs(nome){
       var nextDay=(hF<=hI&&t.fa==='notte')?1:0; // notte va al giorno dopo
       lines.push('BEGIN:VEVENT');
       lines.push('UID:'+uid);
-      lines.push('DTSTART:'+icsDateTime(MESE_ANNO,MESE_MESE,gg,hI,mI,0));
-      lines.push('DTEND:'+icsDateTime(MESE_ANNO,MESE_MESE,gg,hF,mF,nextDay));
+      lines.push('DTSTART:'+icsDateTime(annoIcs,meseIcs,gg,hI,mI,0));
+      lines.push('DTEND:'+icsDateTime(annoIcs,meseIcs,gg,hF,mF,nextDay));
       lines.push('SUMMARY:'+GRUPPI_INFO[mansione].l+' — '+codice);
       lines.push('DESCRIPTION:Sede: '+sede+'\\nTurno: '+codice+'\\nMansione: '+GRUPPI_INFO[mansione].l);
       lines.push('LOCATION:'+sede);
@@ -1262,7 +1322,7 @@ function scaricaIcs(nome){
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
   a.href=url;
-  a.download='turni_'+dip.n.replace(/\s/g,'_')+'_'+nomeMese+MESE_ANNO+'.ics';
+  a.download='turni_'+dip.n.replace(/\s/g,'_')+'_'+nomeMese+annoIcs+'.ics';
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
@@ -1353,27 +1413,51 @@ function renderCard(dip,codice,fascia){
 // ============================================================
 // MODAL DIPENDENTE
 // ============================================================
-function openModal(nome){
-  var dip=DIPENDENTI.find(function(d){return d.n===nome;});
-  if(!dip)return;
-  document.getElementById('modal-nome').textContent=dip.n;
-  document.getElementById('modal-ruolo').textContent=(dip.s==='parco'?'Parco Prenestino':'San Lorenzo')+' · '+NOMI_M[MESE_MESE]+' '+MESE_ANNO;
-  var primo=new Date(MESE_ANNO,MESE_MESE,1).getDay();
+function openModal(nome,indiceIniziale){
+  nomeDipendenteModal=nome;
+  indiceMeseModal=typeof indiceIniziale==='number'?indiceIniziale:indiceMeseAttivo;
+  renderModalTurni();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function navMeseModal(delta){
+  var nuovo=indiceMeseModal+delta;
+  if(nuovo<0||nuovo>=ARCHIVIO_MESI.length)return;
+  indiceMeseModal=nuovo;
+  renderModalTurni();
+}
+
+function renderModalTurni(){
+  var meseArchivio=ARCHIVIO_MESI[indiceMeseModal];
+  var dip=meseArchivio.dipendenti.find(function(d){return d.n===nomeDipendenteModal;});
+  document.getElementById('modal-nome').textContent=nomeDipendenteModal;
+  document.getElementById('modal-month-label').textContent=etichettaMese(meseArchivio);
+  document.getElementById('modal-prev-month').disabled=indiceMeseModal===0;
+  document.getElementById('modal-next-month').disabled=indiceMeseModal===ARCHIVIO_MESI.length-1;
+  var vuoto=document.getElementById('modal-month-empty');
+  if(!dip){
+    document.getElementById('modal-ruolo').textContent='Nessun prospetto disponibile';
+    document.getElementById('modal-grid').innerHTML='';
+    vuoto.style.display='block';
+    return;
+  }
+  vuoto.style.display='none';
+  document.getElementById('modal-ruolo').textContent=dip.s==='parco'?'Parco Prenestino':'San Lorenzo';
+  var primo=new Date(meseArchivio.anno,meseArchivio.mese,1).getDay();
   var g='';
   NOMI_G.forEach(function(x){g+='<div class="day-header">'+x+'</div>';});
   for(var i=0;i<primo;i++) g+='<div></div>';
-  for(var gg=1;gg<=GIORNI_MESE;gg++){
+  for(var gg=1;gg<=meseArchivio.giorni;gg++){
     var c=dip.t[gg-1]||'—';
     var t=parseTurno(c);
     var dcMap={riposo:'dc-r',assente:'dc-a',sn:'dc-sn',disp:'dc-di',doppio:'dc-d',mattina:'dc-m',pomeriggio:'dc-p',notte:'dc-n',giorno:'dc-g'};
     var dc='';
     if(t) dc=dcMap[t.tipo==='lavoro'?t.fa:t.tipo]||'';
-    if(gg===currentDay) dc+=' dc-today';
+    if(indiceMeseModal===indiceMeseAttivo&&gg===currentDay) dc+=' dc-today';
     var abbr=c.length>7?c.substring(0,7):c;
     g+='<div class="day-cell '+dc+'"><div class="day-num">'+gg+'</div><div class="day-code">'+abbr+'</div></div>';
   }
   document.getElementById('modal-grid').innerHTML=g;
-  document.getElementById('modal-overlay').classList.add('open');
 }
 
 function closeModal(e){ if(e.target===document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); }
