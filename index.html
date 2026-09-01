@@ -597,21 +597,27 @@ function findOrario(c){
   return null;
 }
 
+function getCodicePerFascia(codice, fascia){
+  if(!codice) return '';
+  var c=codice.trim();
+  if(!c.includes('-')) return c;
+  var parts=c.split('-');
+  var a=parts[0].trim(), b=parts[1].trim();
+  if(a.toUpperCase()==='ASS') return b;
+  if(b.toUpperCase()==='ASS') return a;
+  var oa=ORARI[a]||findOrario(a);
+  var ob=ORARI[b]||findOrario(b);
+  if(oa&&ob&&oa.fa!==ob.fa){
+    return fascia===ob.fa?b:a;
+  }
+  return a;
+}
+
 function getMansione(codice, fascia){
   if(!codice) return 'manovra';
-  var c=codice.trim();
+  var c=getCodicePerFascia(codice,fascia);
   var cu=c.toUpperCase().replace(/\s/g,'');
   if(['R1','R2','RM','RIP','SN','ASS','DISP'].includes(cu)) return 'manovra';
-  if(c.includes('-')){
-    var parts=c.split('-');
-    var a=parts[0].trim(), b=parts[1].trim();
-    var oa=ORARI[a]||findOrario(a);
-    var ob=ORARI[b]||findOrario(b);
-    if(oa&&ob&&oa.fa!==ob.fa){
-      var codicePerFascia=(fascia==='notte')?b:a;
-      return getMansione(codicePerFascia, fascia);
-    }
-  }
   if(cu.startsWith('CT')) return 'capoturno';
   if(/^[MP]T\d/.test(cu)||/^NT\d/.test(cu)) return 'traghetto';
   if(cu.startsWith('G')) return 'giornaliero';
@@ -620,6 +626,25 @@ function getMansione(codice, fascia){
   if(['M1','M3','P1','P3','N1','N3'].includes(cu)) return 'deviatore';
   if(cu.includes('CP')||cu.includes('CD')) return 'condotta';
   return 'manovra';
+}
+
+function getSedeTurno(codice, fascia, sedePredefinita){
+  var c=getCodicePerFascia(codice,fascia);
+  var cu=c.toUpperCase().replace(/\s/g,'');
+
+  // Rimessa locomotive di Roma San Lorenzo
+  if(cu.includes('CD')||/^[MPN]MD\d*$/.test(cu)||cu.includes('7V')||cu==='GCF') return 'deposito';
+
+  // Impianti e attività di Parco Prenestino
+  if(cu.includes('CP')||/^[MPN]MP\d*$/.test(cu)||/^[MPN]T\d/.test(cu)||cu.startsWith('CT')||
+     ['M1','M3','P1','P3','N1','N3','GVM','M','P','N'].includes(cu)) return 'parco';
+
+  // Riposi, assenze, disponibilità e codici generici non indicano una sede.
+  return sedePredefinita==='deposito'?'deposito':'parco';
+}
+
+function etichettaSede(sede){
+  return sede==='deposito'?'Roma San Lorenzo · Rimessa locomotive':'Parco Prenestino';
 }
 
 function parseTurno(codice){
@@ -1192,7 +1217,7 @@ function renderHomeSearch(){
   res.innerHTML=found.map(function(dip){
     var ini=dip.n.split(' ').slice(0,2).map(function(p){return p[0];}).join('');
     var nm=dip.n.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
-    return '<div class="home-result-card" onclick="openModalByName(\''+nm+'\')"><div class="home-result-av">'+ini+'</div><div><div class="home-result-nome">'+dip.n+'</div><div class="home-result-ruolo">'+(dip.s==='parco'?'Parco Prenestino':'San Lorenzo')+'</div></div></div>';
+    return '<div class="home-result-card" onclick="openModalByName(\''+nm+'\')"><div class="home-result-av">'+ini+'</div><div><div class="home-result-nome">'+dip.n+'</div><div class="home-result-ruolo">Consulta i turni mese per mese</div></div></div>';
   }).join('');
 }
 
@@ -1238,7 +1263,7 @@ function renderIcsSearch(){
   res.innerHTML=found.map(function(dip){
     var ini=dip.n.split(' ').slice(0,2).map(function(p){return p[0];}).join('');
     var nm=dip.n.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
-    return '<div class="ics-result"><div class="ics-av">'+ini+'</div><div><div class="ics-nome">'+dip.n+'</div><div class="ics-ruolo">'+(dip.s==='parco'?'Parco Prenestino':'San Lorenzo')+'</div></div><button class="ics-dl-btn" onclick="scaricaIcs(\''+nm+'\')">⬇ ICS</button></div>';
+    return '<div class="ics-result"><div class="ics-av">'+ini+'</div><div><div class="ics-nome">'+dip.n+'</div><div class="ics-ruolo">'+etichettaMese(mese)+'</div></div><button class="ics-dl-btn" onclick="scaricaIcs(\''+nm+'\')">⬇ ICS</button></div>';
   }).join('');
 }
 
@@ -1264,8 +1289,8 @@ function scaricaIcs(nome){
     var t=parseTurno(codice);
     if(!t||t.tipo==='riposo'||t.tipo==='assente'||t.tipo==='sn') continue;
 
-    var mansione=getMansione(codice,'mattina');
-    var sede=dip.s==='parco'?'Parco Prenestino':'San Lorenzo - Deposito';
+    var mansione=getMansione(codice,t.fa||'mattina');
+    var sede=etichettaSede(getSedeTurno(codice,t.fa||'mattina',dip.s));
     var uid='RSL-'+dip.n.replace(/\s/g,'')+'-'+gg+'-'+siglaMese+'@mercitalia';
 
     if(t.tipo==='doppio'){
@@ -1274,14 +1299,16 @@ function scaricaIcs(nome){
       var orN=t.in.split(':'), orNf=t.f.split(':');
       var mansM=getMansione(codice,'mattina');
       var mansN=getMansione(codice,'notte');
+      var sedeM=etichettaSede(getSedeTurno(codice,'mattina',dip.s));
+      var sedeN=etichettaSede(getSedeTurno(codice,'notte',dip.s));
 
       lines.push('BEGIN:VEVENT');
       lines.push('UID:'+uid+'-M');
       lines.push('DTSTART:'+icsDateTime(annoIcs,meseIcs,gg,parseInt(orM[0]),parseInt(orM[1]),0));
       lines.push('DTEND:'+icsDateTime(annoIcs,meseIcs,gg,parseInt(orMf[0]),parseInt(orMf[1]),0));
       lines.push('SUMMARY:'+mansM+' — '+codice+' (Mattina)');
-      lines.push('DESCRIPTION:Sede: '+sede+'\\nTurno: '+codice);
-      lines.push('LOCATION:'+sede);
+      lines.push('DESCRIPTION:Sede: '+sedeM+'\\nTurno: '+codice);
+      lines.push('LOCATION:'+sedeM);
       lines.push('END:VEVENT');
 
       lines.push('BEGIN:VEVENT');
@@ -1289,8 +1316,8 @@ function scaricaIcs(nome){
       lines.push('DTSTART:'+icsDateTime(annoIcs,meseIcs,gg,parseInt(orN[0]),parseInt(orN[1]),0));
       lines.push('DTEND:'+icsDateTime(annoIcs,meseIcs,gg+1,parseInt(orNf[0]),parseInt(orNf[1]),0));
       lines.push('SUMMARY:'+mansN+' — '+codice+' (Notte)');
-      lines.push('DESCRIPTION:Sede: '+sede+'\\nTurno: '+codice);
-      lines.push('LOCATION:'+sede);
+      lines.push('DESCRIPTION:Sede: '+sedeN+'\\nTurno: '+codice);
+      lines.push('LOCATION:'+sedeN);
       lines.push('END:VEVENT');
     } else if(t.tipo==='disp'){
       lines.push('BEGIN:VEVENT');
@@ -1349,14 +1376,15 @@ function render(){
   updateFasciaSel();
 
   var q=document.getElementById('search').value.toLowerCase().trim();
-  var sedi=[{k:'parco',l:'Parco Prenestino'},{k:'deposito',l:'San Lorenzo · Deposito'}];
+  var sedi=[{k:'parco',l:'Parco Prenestino'},{k:'deposito',l:'Roma San Lorenzo · Rimessa locomotive'}];
   var totale=0, html='';
 
   sedi.forEach(function(sede){
     var gruppi={};
     GRUPPI_ORD.forEach(function(g){gruppi[g]=[];});
-    DIPENDENTI.filter(function(d){return d.s===sede.k;}).forEach(function(dip){
+    DIPENDENTI.forEach(function(dip){
       var codice=dip.t[currentDay-1]||'';
+      if(getSedeTurno(codice,fascia,dip.s)!==sede.k)return;
       if(q){if(!dip.n.toLowerCase().includes(q))return;}
       else{if(!isAttivo(codice,fascia))return;}
       var meff=getMansione(codice,fascia);
@@ -1442,7 +1470,7 @@ function renderModalTurni(){
     return;
   }
   vuoto.style.display='none';
-  document.getElementById('modal-ruolo').textContent=dip.s==='parco'?'Parco Prenestino':'San Lorenzo';
+  document.getElementById('modal-ruolo').textContent='Sede e mansione seguono il turno del giorno';
   var primo=new Date(meseArchivio.anno,meseArchivio.mese,1).getDay();
   var g='';
   NOMI_G.forEach(function(x){g+='<div class="day-header">'+x+'</div>';});
