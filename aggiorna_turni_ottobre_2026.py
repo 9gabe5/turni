@@ -1,0 +1,98 @@
+from pathlib import Path
+p=Path("index.html")
+s=p.read_text(encoding="utf-8")
+if "TURNI_OTTOBRE_2026" in s:
+    raise SystemExit("October already present")
+block = r'''var TURNI_OTTOBRE_2026=[
+  {n:"Alivernini Flavio",s:"parco",t:["P1","M1-N1","SN","R2","Rip","P1","M1-N1","SN","R2","ASS","ASS","M1-N1","SN","R1","R2","P1","M1-N1","SN","RM","ASS","P1","M1-N1","SN","R1","R2","P1","M1-N1","SN","R1","R2","P1"]},
+  {n:"Calascione Valerio",s:"parco",t:["R2","P1","M1-N3","N1","SN","G CF","Rip","M1-N1","SN","R1","R2","CTp","M1-N1","SN","R2","P","P1","M1-N3","SN","Rip","R1","P1","M1-N3","SN","R2","Rip","P1","M1-N3","SN","R2","M3"]},
+  {n:"Cantini Daniele",s:"parco",t:["CTm-N3","SN","R1","CTm","P3","M3-N3","SN","R1","R2","P3","M3-N3","SN","R1","P","P3","M3-N3","SN","R2","Rip","P3","M3-N3","SN","R2","DISP","P3","M3-N3","SN","R1","R2","P1","M1-N1"]},
+  {n:"Cordeschi Simone",s:"parco",t:["ASS","R2","M","P3","M3-N3","SN","R1","R2","P3","M3-N1","SN","P1","RM","P3","M3-N3","SN","R1","R2","P3","M3-N3","SN","R1","R2","P3","M3-N3","SN","R1","P","P3","M3-N3","SN"]},
+  {n:"Di Pietro Antonio",s:"parco",t:["R2","P3","M3","ASS","RM","M","P3","M3-N3","SN","R1","R2","P3","M3-N3","SN","R1","R2","P3","M3-nmp3","SN","R1","Rip","P3","M3-nmp3","SN","R2","Rip","P3","M3-nmp3","SN","R2","P"]},
+  {n:"Giusti Pasquale",s:"parco",t:["SN","CTp","R2","P1","M1-N1","SN","R1","R2","P1","ASS","ASS","RM","P","P1","M1-N1","SN","R1","R2","P1","M1-N1","SN","R1","R2","P1","M1-N1","SN","Rip","DISP","P1","M1-N1","SN"]},
+  {n:"Lipperini Marco",s:"parco",t:["R1","R2","P3","M3-N3","SN","R1","P1","P3","N3 ASS","SN","R2","Rip","P3","M3-nmp3","SN","R2","M","P3","M3-N3","SN","R1","R2","ASS","M3-nmp3","SN","RM","P","P3","M3-nmp3","SN","R1"]},
+  {n:"Molinari Mattia",s:"parco",t:["R1","R2","P1","M1","Rip","Rip","M","ASS","N1 ASS","SN","R2","P","P1","M1-N3","SN","R2","P","P1","M1-N1","SN","R1","R2","P1","M1-N3","SN","RM","P","P1","M1-N3","SN","R1"]},
+  {n:"Pandolfi Stefano",s:"parco",t:["CTp","CTm-CTn","SN","R2","Rip","CTp","CTm-CTn","SN","R2","M1","CTp","CTm-CTn","SN","R1","R2","CTp","CTm-CTn","SN","CTm","RM","CTp","CTm-CTn","SN","R1","R2","CTp","CTm-CTn","SN","R1","R2","CTp"]},
+  {n:"Vicarelli Augusto",s:"parco",t:["M1-N1","SN","R1","R2","P1","M1-N1","SN","R1","M1","P1","M1-N1","SN","Rip","P","P1","M1-N1","SN","R2","Rip","P1","M1-N1","SN","R2","P","P1","M1-N1","SN","R1","R2","ASS","ASS"]},
+  {n:"Vitti Christian",s:"parco",t:["R2","PT1","MT1-NT1","SN","RM","M","PT1","MT1-NT1","SN","R1","MT5","PT1","MT1-NT1","SN","R1","R2","PT1","MT1-NT1","SN","R1","Rip","PT1","MT1-NT1","SN","R2","Rip","PT1","MT1-NT1","SN","R2","P"]},
+  {n:"Assi Davide",s:"parco",t:["R1","R2","PT2","MT2-NT2","SN","R1","P","PT2","MT2-NT2","SN","R2","Rip","PT2","MT2-NT2","SN","R2","R1","ASS","MT2-NT2","SN","R2","P","PT2","MT2-NT2","SN","RM","M","PT2","MT2-NT2","SN","R1"]},
+  {n:"Biscossi Marco",s:"parco",t:["MT3-NT3","SN","R1","R2","PT3","MT3-NT3","SN","R1","G CF","ASS","ASS","ASS","R1","P","PT3","MT3-NT3","SN","R2","Rip","PT3","MT3-NT3","SN","PCD","R2","PT3","MT3-NT3","SN","R1","R2","PT3","MT3-NT3"]},
+  {n:"Cecchini Piergiorgio",s:"parco",t:["PT5","MT5","PT5","MT5","RM","PT5","PT5","MT5","PT5","R1","PT4","PT5","MT5","MT5","R1","R2","MT5","PT5","MT5","R1","G CF","PT5","MT5","PT5","MT5","RM","PT5","PT5","MT5","PT5","R1"]},
+  {n:"Coccimiglio Alessandro",s:"parco",t:["R1","R2","MT5","PT5","MT5","R1","R2","PT5","MT5","PCD","ASS","RM","PT5","ASS","MT5","PT5","R1","PT2","PT5","MT5","MT5","R1","R2","MT5","PT5","MT5","R1","R2","PT5","MT5","ASS"]},
+  {n:"Cozzolino Alessandro",s:"parco",t:["SN","R2","PT4","PT3","MT3-NT3","SN","R1","R2","G CF","MT3-NT3","SN","RM","P","PT3","MT3-NT3","SN","R1","R2","PT3","MT3-NT3","SN","R1","R2","PT3","MT3-NT3","SN","R1","M","PT3","MT3-NT3","SN"]},
+  {n:"Croce Flavio",s:"parco",t:["PT2","MT2-NT2","SN","R2","Rip","PT2","MT2-NT2","SN","R2","PT4","PT2","MT2-NT2","NT2","SN","R2","PT2","MT2-NT2","SN","RM","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","PT2"]},
+  {n:"Gatti Danilo",s:"parco",t:["PT4","MT4","ASS","MT4","RM","PT4","PT4","MT4","PT4","R1","R2","PT4","MT4","MT4","R1","R2","MT4","PT4","MT4","G CF","R2","PT4","MT4","PT4","MT4","RM","PT4","PT4","MT4","PT4","R1"]},
+  {n:"Ignazzitto Alessio",s:"parco",t:["MT5","PT5","R1","R2","PT5","MT5","MT5","R1","R2","MT5","PT5","MT5","R1","R2","PT5","MT5","PT5","MT5","RM","PT5","PT5","MT5","PT5","R1","R2","PT5","MT5","MT5","R1","R2","MT5"]},
+  {n:"Marzano Domenico",s:"parco",t:["ASS","ASS","R1","R2","PT2","MT2-NT2","SN","R2","G CF","PT2","MT2-NT2","SN","R1","Rip","PT2","MT2-NT2","SN","R2","Rip","PT2","MT2-NT2","SN","R2","P","PT2","MT2-NT2","SN","R1","R2","PT2","MT2-NT2"]},
+  {n:"Modesti Andrea",s:"parco",t:["R1","R2","ASS","MT1","ASS","R1","P","PT3","MT3-NT3","NT2","SN","Rip","PT3","MT3-NT3","SN","R2","P","PT3","MT3-NT3","SN","R1","R2","PT3","MT3-NT3","SN","RM","M","PT3","MT3-NT3","SN","R1"]},
+  {n:"Morzilli Samuele",s:"parco",t:["SN","R2","Rip","PCD","MT2-NT2","SN","R2","M","PT3","MT2","ASS","RM","P","PT1","MT2-NT2","SN","R1","R2","PT1","MT2-NT2","SN","R1","R2","PT1","MT2-NT2","SN","R1","P","PT1","MT2-NT2","SN"]},
+  {n:"Orefice Luca",s:"parco",t:["SN","R2","Rip","PT2","MT1-NT1","SN","R1","R2","PT2","ASS","ASS","MT4","RM","PT2","MT1-NT1","SN","R1","R2","PT2","MT1-NT1","SN","MT4","R2","PT2","MT1-NT1","SN","R1","G VM","PT2","MT1-NT1","SN"]},
+  {n:"Pedicelli Andrea",s:"parco",t:["R2","PT2","MT2-NT2","SN","RM","DISP","PT2","MT2-NT2","SN","R1","R2","ASS","ASS","ASS","R1","R2","PT2","MT2-NT2","SN","R1","Rip","PT2","MT2-NT2","SN","R2","Rip","PT2","MT2-NT2","SN","R2","PT5"]},
+  {n:"Porri Simone",s:"parco",t:["ASS","PT4","R1","R2","PT4","MT4","MT4","R1","G CF","ASS","ASS","ASS","R1","R2","PT4","MT4","PT4","MT4","RM","PT4","PT4","MCD","PT4","R1","R2","PT4","MT4","MT4","R1","R2","MT4"]},
+  {n:"Rezzonico Daniele",s:"parco",t:["R2","PT3","MT3-NT3","SN","RM","G CF","PT3","MT3-NT3","SN","R1","R2","PT3","MT3-NT3","SN","R1","R2","PT3","MT3-NT3","SN","R1","Rip","PT3","MT3-NT3","SN","R2","Rip","PT3","MT3-NT3","SN","R2","P"]},
+  {n:"Santi Giulio",s:"parco",t:["R1","R2","MT4","PT4","PT1","R1","R2","PT4","G CF","ASS","ASS","RM","PT4","PT4","MT4","PT4","R1","R2","PT4","MT4","MT4","R1","R2","MT4","PT4","MT4","R1","R2","PT4","MT4","PT4"]},
+  {n:"Scappaticci Matteo",s:"parco",t:["R1","R2","ASS","MT1-NT1","SN","R1","P","PT1","MT1","ASS","R2","Rip","PT1","MT1-NT1","SN","R2","P","PT1","MT1-NT1","SN","R1","R2","PT1","MT1-NT1","SN","RM","M","PT1","MT1-NT1","SN","R1"]},
+  {n:"Tomaselli Daniele",s:"parco",t:["PT1","MT1-NT1","SN","R2","Rip","PT1","MT1-NT1","SN","R2","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","PT1","MT1-NT1","SN","R1","R2","PT1"]},
+  {n:"Troncarelli Gianluca",s:"parco",t:["MT4-NT1","SN","R1","MT4","MT4","MT1-NT1","SN","R1","R2","MT4","MT1-NT1","SN","R1","P","PT1","MT1-NT1","SN","CTp","Rip","PT1","MT1-NT1","SN","R2","M","PT1","MT1-NT1","SN","R1","R2","PT1","MT1-NT1"]},
+  {n:"Saputo Salvatore",s:"parco",t:["MT2-NT2","SN","R1","R2","PCP1","MCP1-nmp1","SN","R1","R2","PT3","MT3-NT3","SN","R1","PT5","PCP1","MCP1-nmp1","SN","R2","G CF","PCP1","MCP1-nmp1","SN","R2","Rip","PCP1","MCP1-nmp1","SN","R1","R2","PCP1","MCP1-N3"]},
+  {n:"Abbafati Alessio",s:"parco",t:["PCP2","MCP2-NT3","SN","R2","Rip","PCP2","MCP2-NCP2","SN","R2","PT1","PT1","MT1-NT1","SN","R1","R2","PT1","MT1-NT1","SN","RM","P","PT2","MT2-NT2","SN","R1","R2","PT2","MT2-NT2","SN","R1","R2","PCP2"]},
+  {n:"Agostini Costantino",s:"parco",t:["mmp2-nmp1","SN","R1","R2","G CF","P","M","R1","R2","Rip","pmp2","mmp2-nmp2","SN","R2","P","pmp2","mmp2-nmp2","SN","RM","P","pmp2","mmp2-nmp2","SN","R1","R2","P","M","M","P","R1","R2"]},
+  {n:"Ambesi Antonio",s:"parco",t:["R1","R2","M","pmp3","mmp3","R1","R2","P","M3","P","pmp3","RM","P","P","mmp1","P","R1","R2","P","M","M","R1","R2","M","P","M","R1","R2","P","M","P"]},
+  {n:"Casaldi Valerio",s:"parco",t:["R1","R2","pmp3","mmp3-nmp3","SN","R1","M","pmp3","mmp3-nmp3","SN","P3","Rip","pmp3","mmp3","ASS","R2","M","pmp3","mmp3-nmp3","SN","R1","R2","P3","ASS","ASS","RM","DISP","ASS","ASS","ASS","R1"]},
+  {n:"Cherubini Lorenzo",s:"parco",t:["MCP1-nmp2","SN","R1","R2","ASS","mmp2-nmp2","SN","R1","R2","pmp2","mmp2-nmp2","SN","R1","P","pmp2","mmp2-nmp2","SN","R2","Rip","pmp2","mmp2-nmp2","SN","R2","P","pmp2","mmp2-nmp2","SN","R1","R2","pmp2","mmp2-nmp2"]},
+  {n:"Cianciotto Gilberto",s:"parco",t:["ASS","ASS","P","MT3","RM","P","P","M","MCP1","R1","R2","P","M","R1","G VM","R2","M","P","M","R1","R2","P","M","P","M","RM","P","P","M","P","R1"]},
+  {n:"Ciula Alessandro",s:"parco",t:["mmp3","P","R1","R2","G CF","P","M","R2","pmp2","M-nmp3","SN","Rip","R1","R2","P","M","P","M","RM","P","P","M","pmp3","R1","R2","P","M","P","pmp3","R1","R2"]},
+  {n:"Cori Cristian",s:"parco",t:["R1","R2","pmp1","mmp1-nmp1","SN","R1","P","pmp1","mmp1-nmp1","SN","R2","Rip","pmp1","mmp1-nmp1","SN","R2","P","pmp1","mmp1-nmp1","SN","R1","R2","pmp1","mmp1-nmp1","SN","RM","M","pmp1","mmp1-nmp1","SN","R1"]},
+  {n:"Damascan Andrei",s:"parco",t:["R2","pmp1","mmp1-nmp1","SN","pmp2","RM","pmp1","mmp1-nmp1","SN","R1","R2","pmp1","mmp1-nmp1","SN","R1","R2","pmp1","mmp1-nmp1","SN","R1","Rip","pmp1","mmp1-nmp1","SN","R2","Rip","pmp1","mmp1-nmp1","SN","R2","P"]},
+  {n:"De Angelis Andrea",s:"parco",t:["R2","PCP1","MCP1-N1","SN","RM","P","PCP1","MCP2-NCP2","SN","R1","MCP1","PCP1","MCP2-NCP2","SN","R1","R2","PCP1","MCP1-N1","SN","R1","Rip","PCP1","MCP1-N1","SN","R2","Rip","PCP1","MCP1-N1","SN","R2","P"]},
+  {n:"De Angelis Andrea",s:"parco",t:["pmp2","mmp2-nmp2","SN","R2","Rip","pmp2","mmp2-nmp2","SN","R2","PT5","PCP2","MCP2-nmp3","SN","R1","R2","PCP2","MCP2-NCP2","SN","RM","P","PT1","MT1-NT1","SN","R1","R2","pmp2","mmp2-nmp2","SN","R1","R2","pmp2"]},
+  {n:"De Dominicis Daniele",s:"parco",t:["R2","PCP2","MCP2-NCP2","SN","RM","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","PCP2","MCP2-NCP2","SN","R1","Rip","PCP2","MCP2-NCP2","SN","R2","Rip","PCP2","MCP2-NCP2","SN","R2","P"]},
+  {n:"De Palma Luigi",s:"parco",t:["PCP1","ASS","ASS","R2","GVM","PCP1","MCP1-nmp3","SN","R2","PCP1","ASS","MCP1-NCP1","SN","R1","R2","ASS","ASS","ASS","RM","M","PCP1","MCP1-NCP1","SN","R1","R2","PCP1","MCP1-NCP1","SN","R1","R2","PCP1"]},
+  {n:"De Stefani Valerio",s:"parco",t:["R1","R2","pmp2","mmp2-nmp2","SN","R1","M","pmp2","mmp2-nmp2","SN","R2","Rip","pmp2","mmp2-nmp2","SN","P7V","R2","pmp2","mmp2-nmp2","SN","R1","R2","pmp2","mmp2-nmp2","SN","RM","P","pmp2","mmp2-nmp2","SN","R1"]},
+  {n:"Feurra Federico",s:"parco",t:["SN","R2","P","pmp2","mmp2-nmp2","SN","R1","R2","pmp1","mmp1-nmp1","SN","M3","RM","pmp1","M-nmp2","SN","R1","R2","pmp1","mmp1-nmp1","SN","R1","R2","pmp1","mmp1-nmp1","SN","R1","P","pmp1","mmp1-nmp1","SN"]},
+  {n:"Mancinelli Nicolo'",s:"parco",t:["R1","R2","P","PCP1","M-nmp1","SN","R1","R2","PCP1","mmp2-nmp2","SN","RM","P","pmp2","mmp2","PCP1","R1","R2","pmp2","mmp2","P","R1","R2","pmp2","mmp2-nmp2","SN","R1","M","pmp2","mmp2-nmp2","SN"]},
+  {n:"Mastrantonio Alessio",s:"parco",t:["mmp1","mmp3","R1","R2","pmp1","mmp1","P","R1","R2","pmp1","mmp1-nmp1","SN","R1","P","pmp1","mmp1","P","R2","Rip","pmp1","mmp1","P","R2","mmp3","pmp1","mmp1","P","R1","R2","pmp1","mmp1-nmp1"]},
+  {n:"Napolitano Gianmarco",s:"parco",t:["SN","R2","PCP2","PCP2","MCP2-NCP2","SN","R1","R2","PCP2","MCP2-N3","SN","PCP2","RM","PCP2","MCP1-nmp1","SN","R1","R2","PCP2","MCP2-nmp2","SN","R1","R2","ASS","ASS","ASS","R1","G VM","PCP2","MCP2-NCP2","SN"]},
+  {n:"Olivetti Mattia",s:"parco",t:["R2","pmp3","mmp2-nmp2","SN","RM","ASS","pmp3","MCP1-nmp3","SN","R1","R2","pmp3","mmp3-nmp3","SN","R1","R2","pmp3","mmp2-nmp2","SN","R1","Rip","pmp3","mmp2-nmp2","SN","R2","Rip","pmp3","mmp2-nmp2","SN","R2","P"]},
+  {n:"Palla Gianluca",s:"parco",t:["SN","R2","ASS","pmd","mmd-nmd","SN","R1","P1","pmd","mmd-nmd","SN","RM","P","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","R1","M","pmd","mmd-nmd","SN"]},
+  {n:"Perfetti Mattia",s:"parco",t:["P3","M3-N3","SN","R2","Rip","P3","M3-N3","SN","R2","ASS","ASS","N3 ASS","SN","R1","GVM","P3","M3-N3","SN","RM","P","P3","M3-N3","SN","R1","R2","P3","M3-N3","SN","R1","R2","P3"]},
+  {n:"Piacentini Samuel",s:"parco",t:["ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","ASS","RM","P","pmp3","mmp3-nmp3","SN","R1","R2","pmp3","mmp3-nmp3","SN","R1","R2","P"]},
+  {n:"Piccioni Patrizio",s:"parco",t:["ASS","nmp3 ASS","SN","R2","Rip","pmp3","mmp3","P","R2","MCP1","PCP1","mmp3","P","R1","R2","pmp3","MCP1-nmp3","SN","pmp3","RM","PCP2","MCP2-N","SN","R1","MCP2-NCP2","SN","MCP2-N","SN","R1","R2","pmp3"]},
+  {n:"Romani Diego",s:"parco",t:["M3-nmp3","SN","R1","R2","pmp3","mmp3-nmp3","SN","R1","R2","pmp3","mmp3-nmp3","SN","R1","P","pmp3","mmp3-nmp3","SN","R2","Rip","pmp3","mmp3-nmp3","SN","R2","M","pmp3","mmp3-nmp3","SN","R1","R2","pmp3","mmp3-nmp3"]},
+  {n:"Roscini Gabriele",s:"parco",t:["MCP2-NCP2","NCP2","SN","R2","PCP2","MCP2-NCP2","SN","R1","R2","PCP2","MCP2-NCP2","SN","R1","P","PCP2","MCP2-NCP2","SN","R2","Rip","PCP2","MCP2-NCP2","SN","R2","PCP2","PCP2","MCP2-NCP2","SN","R1","R2","PCP2","MCP2-NCP2"]},
+  {n:"Santarpia Emanuele",s:"parco",t:["pmp1","mmp1-nmp1","nmp3","SN","Rip","pmp1","mmp1-nmp1","SN","R2","mmp3","pmp1","mmp1-nmp1","SN","R1","R2","pmp1","mmp1-nmp1","SN","RM","P","pmp1","mmp1-nmp1","SN","R1","R2","pmp1","mmp1-nmp1","SN","R1","R2","pmp1"]},
+  {n:"Santini Matteo",s:"parco",t:["SN","MCP1","R2","ASS","MCP1-nmp3","SN","R1","R2","ASS","ASS","ASS","RM","P","pmp3","mmp3-nmp3","SN","R1","R2","G CF","mmp3-nmp3","SN","R1","R2","pmp3","MCP1-nmp3","SN","R1","P","MCP1","mmp3-nmp3","SN"]},
+  {n:"Santirocchi Francesco",s:"parco",t:["SN","R2","PT1","PT1","ASS","ASS","R1","R2","PT1","MT1-NT1","SN","RM","MCP1","PCP1","MCP2-NCP2","SN","R1","R2","PCP1","MCP1-NCP1","SN","R1","R2","PCP1","ASS","ASS","R1","P","PCP1","MCP1","ASS"]},
+  {n:"Tucci Cristian",s:"parco",t:["R2","pmp2","mmp3","pmp1","mmp1","RM","pmp2","mmp2-nmp2","SN","R1","R2","pmp2","mmp2-nmp2","SN","R1","R2","pmp2","mmp3","P","R1","Rip","pmp2","mmp3","P","R2","Rip","pmp2","mmp3","P","R2","P"]},
+  {n:"Veglianti Leonardo",s:"parco",t:["R1","R2","PCP1","MCP1-NCP1","SN","R1","P","PCP1","MCP2-NCP2","SN","R2","Rip","PCP1","MCP1-N1","SN","R2","P","PCP1","MCP1-CTn","SN","R1","R2","PCP1","MCP1-N1","SN","RM","P","PCP1","M-N1","SN","R1"]},
+  {n:"Zaccaria Luca",s:"parco",t:["R1","R2","PT3","MT1-NT3","SN","R1","PCP2","PCP2","MT4-NT1","SN","MT4","Rip","PCP2","MCP2-NCP2","SN","R2","M","PCP2","MCP2-NCP2","SN","R1","R2","PCP2","MCP2-NCP2","SN","RM","P","PCP2","MCP2-NCP2","SN","R1"]},
+  {n:"Camilli Alessio",s:"parco",t:["pmp3","R2","P","M","RM","P","G CF","mmp3","pmp3","R1","R2","P","M","M","R1","R2","mmp3","P","M","R1","R2","P","M","P","mmp3","RM","P","pmp3","mmp3","P","R1"]},
+  {n:"Arcai Chirra Massimo",s:"parco",t:["ASS","ASS","ASS","R2","Rip","ASS","ASS","ASS","G CF","R2","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","RM","ASS","ASS","ASS","ASS","R1","R2","ASS","ASS","ASS","R1","R2","ASS"]},
+  {n:"Bigioni Davide",s:"parco",t:["SN","R2","P","CTp","CTm-CTn","SN","R1","R2","CTp","CTm-CTn","SN","RM","CTm","CTp","CTm-CTn","SN","R1","P","CTp","CTm-CTn","SN","R1","R2","CTp","CTm-CTn","SN","R1","ASS","CTp","CTm-CTn","SN"]},
+  {n:"Bongi Simone",s:"parco",t:["MT1-CTn","SN","R1","R2","CTp","CTm-CTn","SN","R1","R2","CTp","CTm-CTn","SN","R1","P","CTp","CTm-CTn","SN","R2","Rip","CTp","CTm-CTn","SN","R2","P","CTp","CTm-CTn","SN","R1","R2","CTp","CTm-CTn"]},
+  {n:"Codella Andrea",s:"parco",t:["G VM","R2","CTp","MCP2-CTn","SN","R1","P","CTp","CTm-CTn","NCP1","SN","Rip","CTp","CTm-CTn","SN","R2","Rip","ASS","ASS","ASS","R1","R2","CTp","CTm-CTn","SN","RM","P","CTp","CTm-CTn","SN","R1"]},
+  {n:"Perini Luca",s:"parco",t:["R2","ASS","CTm-CTn","SN","RM","P","CTp","CTm-CTn","SN","R1","R2","PT2","MT2-CTn","SN","R1","R2","CTp","CTm-CTn","SN","R1","Rip","CTp","CTm-CTn","SN","R2","Rip","CTp","CTm-CTn","SN","R2","M"]},
+  {n:"Cabiddu Luca",s:"deposito",t:["mmd-nmd","SN","R1","P7V","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","R1","M","pmd","mmd-nmd","SN","R2","Rip","pmd","mmd-nmd","SN","R2","P","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd"]},
+  {n:"Cruciani Nicholas",s:"deposito",t:["G CF","G CF","R1","R2","G CF","G CF","G CF","G CF","G CF","R1","R2","Rip","ASS","ASS","ASS","ASS","R1","R2","G CF","G CF","G CF","G CF","G CF","R1","R2","G CF","G CF","G CF","G CF","G CF","R1"]},
+  {n:"Fabrizi Andrea",s:"deposito",t:["pmd","mmd-nmd","SN","R2","Rip","pmd","mmd-nmd","SN","R2","DIS P","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","RM","M","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","R1","R2","pmd"]},
+  {n:"Gambale Silvio",s:"deposito",t:["P7V","M7V","P7V","M7V","RM","GVM","P7V","M7V","P7V","R1","R2","P7V","M7V","M7V","R1","R2","M7V","P7V","M7V","R1","R2","P7V","M7V","P7V","M7V","RM","P7V","P7V","M7V","P7V","R1"]},
+  {n:"Mariani Danny",s:"deposito",t:["PCD","PCD","R1","R2","PCD","MCD","MCD","R1","R2","MCD","PCD","MCD","R1","R2","PCD","MCD","PCD","MCD","RM","ASS","ASS","ASS","ASS","R1","R2","PCD","MCD","MCD","R1","R2","MCD"]},
+  {n:"Morici Giovanni",s:"deposito",t:["R1","R2","M7V","P7V","M7V","R1","R2","P7V","M7V","P7V","M7V","RM","P7V","P7V","M7V","ASS","R1","R2","P7V","M7V","M7V","R1","R2","M7V","P7V","M7V","R1","R2","P7V","M7V","P7V"]},
+  {n:"Pagliaro Frederik",s:"deposito",t:["ASS","ASS","ASS","ASS","ASS","ASS","ASS","G","G","R1","R2","G","G","G","G","G","R1","R2","G","G","G","G","G","R1","R2","G","G","G","G","G","R1"]},
+  {n:"Peca Francesco",s:"deposito",t:["R2","pmd","mmd-nmd","SN","RM","P7V","pmd","mmd-nmd","SN","R1","P1","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","R1","Rip","pmd","mmd-nmd","SN","R2","Rip","pmd","mmd-nmd","SN","P3","R2"]},
+  {n:"Rocchetti Valerio",s:"deposito",t:["R1","R2","MCD","PCD","MCD","R1","R2","PCD","MCD","ASS","MCD","RM","PCD","PCD","MCD","PCD","R1","R2","PCD","MCD","MCD","R1","R2","MCD","PCD","MCD","R1","R2","PCD","MCD","PCD"]},
+  {n:"Sabau George Iulian",s:"deposito",t:["M7V","P7V","R1","R2","P7V","M7V","M7V","R1","R2","M7V","P7V","M7V","R1","R2","P7V","M7V","P7V","M7V","RM","P7V","P7V","M7V","P7V","R1","R2","P7V","M7V","M7V","R1","R2","M7V"]},
+  {n:"Valeriano Emanuele",s:"deposito",t:["R1","R2","pmd","mmd-nmd","SN","R1","P","pmd","mmd-nmd","SN","R2","Rip","pmd","mmd-nmd","SN","R2","P","pmd","mmd-nmd","SN","R1","R2","pmd","mmd-nmd","SN","RM","P","pmd","mmd-nmd","SN","R1"]},
+  {n:"Zuena Edoardo",s:"deposito",t:["MCD","MCD","PCD","MCD","RM","PCD","PCD","MCD","PCD","R1","R2","PCD","MCD","MCD","R1","R2","MCD","PCD","MCD","R1","R2","PCD","MCD","PCD","MCD","RM","PCD","PCD","MCD","PCD","R1"]},
+];
+'''
+anchor="var ARCHIVIO_MESI=["
+if anchor not in s: raise SystemExit("ARCHIVIO_MESI anchor not found")
+s=s.replace(anchor,block+"\n"+anchor,1)
+old="  {anno:2026,mese:8,giorni:30,dipendenti:TURNI_SETTEMBRE_2026},\n];"
+new="  {anno:2026,mese:8,giorni:30,dipendenti:TURNI_SETTEMBRE_2026},\n  {anno:2026,mese:9,giorni:31,dipendenti:TURNI_OTTOBRE_2026},\n];"
+if old not in s: raise SystemExit("September archive anchor not found")
+s=s.replace(old,new,1)
+s=s.replace("ARCHIVIO TURNI — LUGLIO-SETTEMBRE 2026","ARCHIVIO TURNI — LUGLIO-OTTOBRE 2026",1)
+p.write_text(s,encoding="utf-8")
+print("October 2026 added")
